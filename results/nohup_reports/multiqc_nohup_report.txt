@@ -1,0 +1,12 @@
+
+  /// MultiQC 🔍 | v1.13.dev0
+
+|           multiqc | MultiQC Version v1.14 now available!
+|           multiqc | Search path : /mnt/d/MSc_Bioif/EANBIT_cohort4/MSc_project/MScProject/results/raw_reads_QC
+|         searching | ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 128/128  
+|            fastqc | Found 64 reports
+|           multiqc | Compressing plot data
+|           multiqc | Report      : ../results/multiQC/multiqc_report.html
+|           multiqc | Data        : ../results/multiQC/multiqc_data
+|           multiqc | MultiQC complete
+done aggregating fastqc reports to a single MultiQC report

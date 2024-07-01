@@ -1,0 +1,679 @@
+---
+title: "To determine the filtering criteria"
+author: "Hildah Njoroge"
+date: "2023-08-18"
+output: html_document
+---
+
+# HISAT2-HTSseq data
+
+### Load the data from the preprocessing step
+
+```{r}
+
+load("C:/hne_files/MSc_Bioinf/MScProject-main_C/MScProject-main_10.06.23/scripts/DEG_analysis/Gene_counts/hisat2_htseq_pipeline/htseq_dds_filtering.Rdata")
+
+
+load("C:/hne_files/MSc_Bioinf/MScProject-main_C/MScProject-main_10.06.23/scripts/DEG_analysis/Gene_counts/htg_pipeline/htg_dds_filtering.Rdata")
+
+```
+
+### Distribution
+
+##### To determine the threshold to set for filtering low expression values
+
+```{r}
+# hist(assay(normCounts_vst), main = "HISAT2-HTSeq Pipeline output when VST normalised",xlim = c(0,20), breaks = seq(0, 20, by = 0.8), ylim = c(0,15000))
+
+meanLog2CPM <- rowMeans(log2(cpm(counts(ddsHTSeq)) + 1))
+meanLog2CPM1 <- log2(rowMeans(cpm(counts(ddsHTSeq)) + 1))
+meanLog2CPM2 <-  aveLogCPM(y = counts(ddsHTSeq),)
+
+hist(meanLog2CPM)
+hist(meanLog2CPM, main = "HISAT2-HTSeq Pipeline output before log2 CPM normalisation",xlim = c(0,20), breaks = seq(0, 20, by = 0.1), ylim = c(0,60))
+
+hist(meanLog2CPM1, main = "HISAT2-HTSeq Pipeline output before log2 CPM normalisation",xlim = c(0,20), breaks = seq(0, 20, by = 0.1), ylim = c(0,60))
+
+hist(meanLog2CPM2, main = "HISAT2-HTSeq Pipeline output before log2 CPM normalisation",xlim = c(-3,20), breaks = seq(-3, 20, by = 0.1), ylim = c(0,60))
+
+hist(meanLog2CPM, main = "HISAT2-HTSeq Pipeline output before log2 CPM normalisation",xlim = c(0,20), breaks = seq(0, 20, by = 0.1), ylim = c(0,60))
+
+
+# expr_cutoff=0.05
+expr_cutoff=0.1
+abline(v = expr_cutoff, col = "red", lwd = 1)
+
+# counts(ddsHTSeq[meanLog2CPM > 1,])
+# paste(sum(meanLog2CPM <= 0.05), "genes are filtered")
+# sum(meanLog2CPM > 0.05)
+# cpm_filtered_htseq <- counts(ddsHTSeq[meanLog2CPM > 0.05,])
+paste(sum(meanLog2CPM <= 0.1), "genes are filtered")
+sum(meanLog2CPM1 > 0.1)
+cpm_filtered_htseq <- counts(ddsHTSeq[meanLog2CPM > 0.1,])
+
+cpm_filtered_htseq_meanLog2CPM <- rowMeans(log2(cpm(cpm_filtered_htseq) + 1))
+
+hist(cpm_filtered_htseq_meanLog2CPM)
+hist(cpm_filtered_htseq_meanLog2CPM, main = "HISAT2-HTSeq Pipeline output when log2 CPM normalised",xlim = c(0,20), breaks = seq(0, 20, by = 0.1), ylim = c(0,60))
+
+
+
+expr_cutoff=0.05
+abline(v = expr_cutoff, col = "red", lwd = 1)
+
+```
+
+#### Defined the DDS using the new cpm filtering criteria - removing the left peak, by setting the threshold at 0.05. This threshold removed 39,210 genes. 
+
+### BUT, on 23/10/23, I have adjusted the threshold to 0.1 up from 0.05. 3 genes in the htseq pipeline are excluded and still, non from the HTG pipeline
+
+##### 1669 genes have been retained- This is so as to retain at least as many genes as those of the HTG panel
+
+
+```{r}
+library(RColorBrewer)
+library(pheatmap)
+#Prepare data for QC after method 2 prefiltering
+dds_cpm_filtered_HTSeq1 <- DESeqDataSetFromMatrix(as.matrix(cpm_filtered_htseq),
+                              design = ~ condition,
+                              colData = sampleTable_shortened)
+
+paste("the number of gene features and samples,respectively are,",dim(dds_cpm_filtered_HTSeq1))
+normCounts_vst <- vst(dds_cpm_filtered_HTSeq1, blind = TRUE) ; normCounts_vst_htseq <- normCounts_vst
+hist(assay(normCounts_vst), main = "HISAT2-HTSeq Pipeline output when\
+     VST normalised after log2(cpm) > 0.05 filtering ", xlim = c(5,20), breaks = seq(0, 20, by = 0.5))
+
+
+qqnorm(assay(normCounts_vst), main = "Normal Q-Q Plot for the HISAT2-HTSeq count data")
+qqline(assay(normCounts_vst))
+
+
+# sampleTable$condition <- relevel(sampleTable$condition, ref = "noColitis")
+sampleColor <- brewer.pal(4, "Accent")[1:4]
+# # sampleColor <- cols <- c( "red","orange", "#0080FF","lightgreen")
+names(sampleColor) <- levels(sampleTable_shortened$condition)
+# sampleTable$condition <- factor(sampleTable$condition)
+sampleDist_vst <- cor(assay(normCounts_vst), method = "pearson")
+
+rownames(sampleDist_vst) <- NULL
+pheatmap(sampleDist_vst,
+         clustering_distance_rows = as.dist(1 - sampleDist_vst),
+         clustering_distance_cols = as.dist(1 - sampleDist_vst),
+         annotation_col = data.frame(Disease = sampleTable_shortened$condition,
+                                     row.names = sampleTable_shortened$sampleName),
+         annotation_colors = list(Disease = sampleColor),
+         main = "Heatmap after filtering by log2(cpm) > 0.05 &\
+         VST normalised approach - Pearson correlation")
+
+
+
+
+# Heatmap after filtering by log2(cpm) > 0.05 & VST normalised approach - Spearman correlation
+sampleDist_vst <- cor(assay(normCounts_vst), method = "spearman")
+
+rownames(sampleDist_vst) <- NULL
+pheatmap(sampleDist_vst,
+         clustering_distance_rows = as.dist(1 - sampleDist_vst),
+         clustering_distance_cols = as.dist(1 - sampleDist_vst),
+         annotation_col = data.frame(Disease = sampleTable_shortened$condition,
+                                     row.names = sampleTable_shortened$sampleName),
+         annotation_colors = list(Disease = sampleColor),
+         main = "A sample-sample correlation heatmap of the HISAT2-HTSeq\
+         pipeline data by Spearman's correlation")
+
+
+sampleDist_vst <- cor(assay(normCounts_vst), method = "spearman")
+
+rownames(sampleDist_vst) <- NULL  # to remove the sample names on the column 
+pheatmap(sampleDist_vst,
+         clustering_distance_rows = as.dist(sampleDist_vst),
+         clustering_distance_cols = as.dist(sampleDist_vst),
+         annotation_col = data.frame(Disease = sampleTable_shortened$condition,
+                                     row.names = sampleTable_shortened$sampleName),
+         annotation_colors = list(Disease = sampleColor),
+         main = "Heatmap after filtering by log2(cpm) > 0.1 &\
+         VST normalised approach - Spearman correlation")
+```
+
+
+#### on 02.03.2024 --> Attempting to modify the "sampleName" column of the sampleTable file in the HTÌSAT2-HTSeq metadata file, to shorten the names by removing the "_counts.txt"
+
+```{r}
+sampleTable_shortened <- sampleTable
+sampleTable_shortened$sampleName <- gsub("_counts.txt", "", sampleTable_shortened$sampleName)
+sampleTable_shortened$fileName <- gsub("_counts.txt", "", sampleTable_shortened$fileName)
+head(sampleTable_shortened)
+```
+
+```{r}
+library(RColorBrewer)
+library(pheatmap)
+#Prepare data for QC after method 2 prefiltering
+dds_cpm_filtered_HTSeq1 <- DESeqDataSetFromMatrix(as.matrix(cpm_filtered_htseq),
+                              design = ~ condition,
+                              colData = sampleTable_shortened)
+
+paste("the number of gene features and samples,respectively are,",dim(dds_cpm_filtered_HTSeq1))
+normCounts_vst <- vst(dds_cpm_filtered_HTSeq1, blind = TRUE) ; normCounts_vst_htseq <- normCounts_vst
+hist(assay(normCounts_vst), main = "HISAT2-HTSeq Pipeline output when\
+     VST normalised after log2(cpm) > 0.05 filtering ", xlim = c(5,20), breaks = seq(0, 20, by = 0.5))
+
+
+qqnorm(assay(normCounts_vst), main = "Normal Q-Q Plot for the HISAT2-HTSeq count data")
+qqline(assay(normCounts_vst))
+
+
+# sampleTable$condition <- relevel(sampleTable$condition, ref = "noColitis")
+sampleColor <- brewer.pal(4, "Accent")[1:4]
+# # sampleColor <- cols <- c( "red","orange", "#0080FF","lightgreen")
+names(sampleColor) <- levels(sampleTable_shortened$condition)
+# sampleTable$condition <- factor(sampleTable$condition)
+sampleDist_vst <- cor(assay(normCounts_vst), method = "pearson")
+
+rownames(sampleDist_vst) <- NULL
+pheatmap(sampleDist_vst,
+         clustering_distance_rows = as.dist(1 - sampleDist_vst),
+         clustering_distance_cols = as.dist(1 - sampleDist_vst),
+         annotation_col = data.frame(Disease = sampleTable_shortened$condition,
+                                     row.names = sampleTable_shortened$sampleName),
+         annotation_colors = list(Disease = sampleColor),
+         main = "Heatmap after filtering by log2(cpm) > 0.05 &\
+         VST normalised approach - Pearson correlation")
+
+
+
+
+# Heatmap after filtering by log2(cpm) > 0.05 & VST normalised approach - Spearman correlation
+sampleDist_vst <- cor(assay(normCounts_vst), method = "spearman")
+
+rownames(sampleDist_vst) <- NULL
+pheatmap(sampleDist_vst,
+         clustering_distance_rows = as.dist(1 - sampleDist_vst),
+         clustering_distance_cols = as.dist(1 - sampleDist_vst),
+         annotation_col = data.frame(Disease = sampleTable_shortened$condition,
+                                     row.names = sampleTable_shortened$sampleName),
+         annotation_colors = list(Disease = sampleColor),
+         main = "A sample-sample correlation heatmap of the HISAT2-HTSeq\
+         pipeline data by Spearman's correlation")
+
+
+sampleDist_vst <- cor(assay(normCounts_vst), method = "spearman")
+
+rownames(sampleDist_vst) <- NULL  # to remove the sample names on the column 
+pheatmap(sampleDist_vst,
+         clustering_distance_rows = as.dist(sampleDist_vst),
+         clustering_distance_cols = as.dist(sampleDist_vst),
+         annotation_col = data.frame(Disease = sampleTable_shortened$condition,
+                                     row.names = sampleTable_shortened$sampleName),
+         annotation_colors = list(Disease = sampleColor),
+         main = "Heatmap after filtering by log2(cpm) > 0.1 &\
+         VST normalised approach - Spearman correlation")
+```
+
+```{r}
+library(ggplot2)
+library(ggrepel)
+library(RColorBrewer)
+par(mfrow=c(3,1))
+# pcaRes <- prcomp(t(assay(normCounts_rlog)))
+# varExp <- round(pcaRes$sdev^2 / sum(pcaRes$sdev^2) * 100)
+# pcaDF <- data.frame(
+#   PC1 = pcaRes$x[, 1],
+#   PC2 = pcaRes$x[, 2],
+#   Disease = coldata$condition2,
+#   Sample = row.names(coldata))
+# pcaPlot <- ggplot(
+#   data = pcaDF,
+#   mapping = aes(x = PC1, y = PC2, color = Disease, label = Sample)) +
+#   geom_point(size = 3) +
+#   geom_text_repel(size = 0) +
+#   labs(x = paste0("PC1 (", varExp[1], " %)"), y = paste0("PC2 (", varExp[2], " %)")) +
+#   theme_minimal() +
+#   theme(axis.text = element_text(size = 12), legend.text = element_text(size = 10)) +
+#   scale_color_manual(values = brewer.pal(4, "Accent")[1:4])
+# print(pcaPlot)
+
+pcaRes <- prcomp(t(assay(normCounts_vst_htseq)))
+varExp <- round(pcaRes$sdev^2 / sum(pcaRes$sdev^2) * 100)
+pcaDF <- data.frame(
+  PC1 = pcaRes$x[, 1],
+  PC2 = pcaRes$x[, 2],
+  Disease = coldata$condition2,
+  Sample = row.names(coldata))
+pcaPlot <- ggplot(
+  data = pcaDF,
+  mapping = aes(x = PC1, y = PC2, color = Disease, label = Sample)) +
+  geom_point(size = 3) +
+  geom_text_repel(size = 0) +
+  labs(x = paste0("PC1 (", varExp[1], " %)"), y = paste0("PC2 (", varExp[2], " %)")) +
+  theme_minimal() +
+  theme(axis.text = element_text(size = 12), legend.text = element_text(size = 10)) +
+  scale_color_manual(values = brewer.pal(4, "Accent")[1:4])+
+  ggtitle("PCA Plot of the VST-transformed HISAT2-HTSeq count data")
+print(pcaPlot)
+
+
+
+
+pcaPlot <- ggplot(
+  data = pcaDF,
+  mapping = aes(x = PC1, y = PC2, color = Disease, label = Sample)) +
+  geom_point(size = 3) +
+  geom_text_repel(size = 3) +
+  labs(x = paste0("PC1 (", varExp[1], " %)"), y = paste0("PC2 (", varExp[2], " %)")) +
+  theme_minimal() +
+  theme(axis.text = element_text(size = 12), legend.text = element_text(size = 10)) +
+  scale_color_manual(values = brewer.pal(4, "Accent")[1:4])+
+  ggtitle("PCA Plot of the VST-transformed HISAT2-HTSeq count data")
+print(pcaPlot)
+
+
+
+
+# to run PCA on disease group only
+pcaRes <- prcomp(t(assay(normCounts_vst_htseq)[,1:42])) 
+varExp <- round(pcaRes$sdev^2 / sum(pcaRes$sdev^2) * 100)
+pcaDF <- data.frame(
+  PC1 = pcaRes$x[, 1],
+  PC2 = pcaRes$x[, 2],
+  Disease = coldata[1:42,]$condition2,
+  Sample = row.names(coldata[1:42,]))
+
+pcaPlot <- ggplot(
+  data = pcaDF,
+  mapping = aes(x = PC1, y = PC2, color = Disease, label = Sample)) +
+  geom_point(size = 3) +
+  geom_text_repel(size = 3) +
+  labs(x = paste0("PC1 (", varExp[1], " %)"), y = paste0("PC2 (", varExp[2], " %)")) +
+  theme_minimal() +
+  theme(axis.text = element_text(size = 12), legend.text = element_text(size = 10)) +
+  scale_color_manual(values = brewer.pal(4, "Accent")[1:4])+
+  ggtitle("PCA Plot of the VST-transformed HISAT2-HTSeq count data")
+print(pcaPlot)
+
+```
+
+=================================================================================================
+
+# HTG data
+
+### Load the data from the preprocessing step
+
+```{r}
+
+load("C:/hne_files/MSc_Bioinf/MScProject-main_C/MScProject-main_10.06.23/scripts/DEG_analysis/Gene_counts/htg_pipeline/htg_dds_filtering.Rdata")
+
+```
+
+### Distribution
+
+##### To determine the threshold to set for filtering low expression values
+
+```{r}
+# hist(assay(normCounts_vst), main = "HISAT2-HTSeq Pipeline output when VST normalised",xlim = c(0,20), breaks = seq(0, 20, by = 0.8), ylim = c(0,15000))
+
+meanLog2CPM <- rowMeans(log2(cpm(counts(ddsHTG)) + 1))
+hist(meanLog2CPM)
+hist(meanLog2CPM, main = "HTG Pipeline output before log2 CPM normalisation",xlim = c(0,20), breaks = seq(0, 20, by = 0.1), ylim = c(0,60))
+
+hist(meanLog2CPM, main = "HTG Pipeline output before log2 CPM normalisation",xlim = c(0,20), breaks = seq(0, 20, by = 0.1), ylim = c(0,60))
+
+
+expr_cutoff=0.1
+abline(v = expr_cutoff, col = "red", lwd = 1)
+
+# counts(ddsHTG[meanLog2CPM > 1,])
+# paste(sum(meanLog2CPM <= 0.05), "genes are filtered")
+# sum(meanLog2CPM > 0.05)
+# cpm_filtered_htg <- counts(ddsHTG[meanLog2CPM > 0.05,])
+
+paste(sum(meanLog2CPM <= 0.1), "genes are filtered")
+sum(meanLog2CPM > 0.1)
+cpm_filtered_htg <- counts(ddsHTG[meanLog2CPM > 0.1,])
+
+cpm_filtered_htg_meanLog2CPM <- rowMeans(log2(cpm(cpm_filtered_htg) + 1))
+
+hist(cpm_filtered_htg_meanLog2CPM)
+hist(cpm_filtered_htg_meanLog2CPM, main = "HTG Pipeline output when log2 CPM normalised",xlim = c(0,20), breaks = seq(0, 20, by = 0.1), ylim = c(0,40))
+
+expr_cutoff=0.1
+abline(v = expr_cutoff, col = "red", lwd = 1)
+
+```
+
+#### Defined the DDS using the new cpm filtering criteria - removing the left peak, by setting the threshold at 0.05. This threshold removed 39,210 genes.
+
+##### 1669 genes have been retained- This is so as to retain at least as many genes as those of the HTG panel
+
+### BUT, after adjusting the threshold to 0.1 meanLogCPM up from 0.05, 1666 genes are retained -- this was done on the 23/10/23
+
+```{r}
+library(RColorBrewer)
+library(pheatmap)
+#Prepare data for QC after method 2 prefiltering
+dds_cpm_filtered_HTG1 <- DESeqDataSetFromMatrix(as.matrix(cpm_filtered_htg),
+                              design = ~ condition2,
+                              colData = coldata)
+
+paste("the number of gene features and samples,respectively are,",dim(dds_cpm_filtered_HTG1))
+normCounts_vst <- vst(dds_cpm_filtered_HTG1, blind = TRUE) ; normCounts_vst_htg <- normCounts_vst
+hist(assay(normCounts_vst), main = "HTG Pipeline output when\
+     VST normalised after log2(cpm) > 0.05 filtering ", xlim = c(0,20), breaks = seq(0, 20, by = 0.8))
+
+qqnorm(assay(normCounts_vst), main = "Normal Q-Q Plot for the HTG count data")
+qqline(assay(normCounts_vst))
+
+# sampleTable$condition <- relevel(sampleTable$condition, ref = "noColitis")
+sampleColor <- brewer.pal(4, "Accent")[1:4]
+# # sampleColor <- cols <- c( "red","orange", "#0080FF","lightgreen")
+# names(sampleColor) <- levels(sampleTable$condition)
+names(sampleColor) <- levels(coldata$condition2)
+# sampleTable$condition <- factor(sampleTable$condition)
+sampleDist_vst <- cor(assay(normCounts_vst), method = "pearson")
+
+rownames(sampleDist_vst) <- NULL
+pheatmap(sampleDist_vst,
+         clustering_distance_rows = as.dist(1 - sampleDist_vst),
+         clustering_distance_cols = as.dist(1 - sampleDist_vst),
+         annotation_col = data.frame(Disease = coldata$condition2,
+                                     row.names = row.names(coldata)),
+         annotation_colors = list(Disease = sampleColor),
+         main = "Heatmap after filtering by log2(cpm) > 0.05 &\
+         VST normalised approach - Pearson correlation")
+
+
+
+# Heatmap after filtering by log2(cpm) > 0.05 & VST normalised approach - Spearman correlation
+sampleDist_vst <- cor(assay(normCounts_vst), method = "spearman")
+rownames(sampleDist_vst) <- NULL
+pheatmap(sampleDist_vst,
+         clustering_distance_rows = as.dist(1 - sampleDist_vst),
+         clustering_distance_cols = as.dist(1 - sampleDist_vst),
+         annotation_col = data.frame(Disease = coldata$condition2,
+                                     row.names = row.names(coldata)),
+         annotation_colors = list(Disease = sampleColor),
+         main = "A sample-sample correlation heatmap of the HTG \
+         pipeline data by Spearman's correlation")
+```
+
+```{r}
+library(ggplot2)
+library(ggrepel)
+library(RColorBrewer)
+par(mfrow=c(3,1))
+# pcaRes <- prcomp(t(assay(normCounts_rlog)))
+# varExp <- round(pcaRes$sdev^2 / sum(pcaRes$sdev^2) * 100)
+# pcaDF <- data.frame(
+#   PC1 = pcaRes$x[, 1],
+#   PC2 = pcaRes$x[, 2],
+#   Disease = coldata$condition2,
+#   Sample = row.names(coldata))
+# pcaPlot <- ggplot(
+#   data = pcaDF,
+#   mapping = aes(x = PC1, y = PC2, color = Disease, label = Sample)) +
+#   geom_point(size = 3) +
+#   geom_text_repel(size = 0) +
+#   labs(x = paste0("PC1 (", varExp[1], " %)"), y = paste0("PC2 (", varExp[2], " %)")) +
+#   theme_minimal() +
+#   theme(axis.text = element_text(size = 12), legend.text = element_text(size = 10)) +
+#   scale_color_manual(values = brewer.pal(4, "Accent")[1:4])
+# print(pcaPlot)
+
+pcaRes <- prcomp(t(assay(normCounts_vst)))
+varExp <- round(pcaRes$sdev^2 / sum(pcaRes$sdev^2) * 100)
+pcaDF <- data.frame(
+  PC1 = pcaRes$x[, 1],
+  PC2 = pcaRes$x[, 2],
+  Disease = coldata$condition2,
+  Sample = row.names(coldata))
+pcaPlot <- ggplot(
+  data = pcaDF,
+  mapping = aes(x = PC1, y = PC2, color = Disease, label = Sample)) +
+  geom_point(size = 3) +
+  geom_text_repel(size = 0) +
+  labs(x = paste0("PC1 (", varExp[1], " %)"), y = paste0("PC2 (", varExp[2], " %)")) +
+  theme_minimal() +
+  theme(axis.text = element_text(size = 12), legend.text = element_text(size = 10)) +
+  scale_color_manual(values = brewer.pal(4, "Accent")[1:4]) +
+  ggtitle("PCA Plot of the VST-transformed HTG count data")
+print(pcaPlot)
+
+
+
+
+
+
+# to run PCA on disease group only
+pcaRes <- prcomp(t(assay(normCounts_vst)[,1:42])) 
+varExp <- round(pcaRes$sdev^2 / sum(pcaRes$sdev^2) * 100)
+pcaDF <- data.frame(
+  PC1 = pcaRes$x[, 1],
+  PC2 = pcaRes$x[, 2],
+  Disease = coldata[1:42,]$condition2,
+  Sample = row.names(coldata[1:42,]))
+
+pcaPlot <- ggplot(
+  data = pcaDF,
+  mapping = aes(x = PC1, y = PC2, color = Disease, label = Sample)) +
+  geom_point(size = 3) +
+  geom_text_repel(size = 1) +
+  labs(x = paste0("PC1 (", varExp[1], " %)"), y = paste0("PC2 (", varExp[2], " %)")) +
+  theme_minimal() +
+  theme(axis.text = element_text(size = 12), legend.text = element_text(size = 10)) +
+  scale_color_manual(values = brewer.pal(4, "Accent")[1:4]) +
+  ggtitle("PCA Plot of the VST-transformed HTG count data")
+print(pcaPlot)
+```
+
+### save the data as an R image
+
+```{r}
+save.image(file = "C:/hne_files/MSc_Bioinf/MScProject-main_C/MScProject-main_10.06.23/scripts/DEG_analysis/Gene_counts/filtering_criteria.Rdata")
+```
+
+=================================================================================== \### Exploring heatmap plotting on the HTG data
+
+```{r}
+normCounts_vst <- vst(dds_cpm_filtered_HTG1, blind = TRUE)
+sampleDist_vst <- cor(assay(normCounts_vst), method = "spearman")
+rownames(sampleDist_vst) <- NULL
+pheatmap(sampleDist_vst,
+         clustering_distance_rows = as.dist(1-sampleDist_vst),
+         clustering_distance_cols = as.dist(1-sampleDist_vst),
+         annotation_col = data.frame(Disease = coldata$condition2,
+                                     row.names = row.names(coldata)),
+         annotation_colors = list(Disease = sampleColor),
+         main = "Heatmap after filtering by log2(cpm) > 0.05 &\
+         VST normalised approach - Spearman correlation")
+```
+
+### using the "corrplot" to plot the correlation matrix
+
+```{r}
+sampleDist_vst <- cor(assay(normCounts_vst), method = "spearman")
+corrplot(sampleDist_vst)
+corrplot(sampleDist_vst,order = "hclust")
+corrplot(sampleDist_vst, is.corr = F)
+corrplot(sampleDist_vst, is.corr = F, order = "hclust")
+# corrplot(sampleDist_vst,order = "hclust",method = "number")
+```
+
+## Euclidean distance calculation
+
+#### by first having calculated the Euclidean Distance then plottin the heatmap
+
+```{r}
+euclidDist_vst <- dist(t(assay(normCounts_vst)), method = "euclidean")
+euclidDist_vst <- as.matrix(euclidDist_vst)
+corrplot(euclidDist_vst,is.corr = F)
+
+rownames(euclidDist_vst) <- NULL
+pheatmap(euclidDist_vst,
+         clustering_distance_cols = as.dist(euclidDist_vst),
+         clustering_distance_rows = as.dist(euclidDist_vst),
+         annotation_col = data.frame(Disease = coldata$condition2,
+                                     row.names = row.names(coldata)),
+         annotation_colors = list(Disease = sampleColor),
+         main = "Heatmap after filtering by log2(cpm) > 0.05 &\
+         VST normalised approach - Euclidean Dist")
+```
+
+#### in this plot, I have just run 'pheatmap' giving it the VST-normlised HTG counts as the input. the default method for calculating hte distances is 'Euclidean' and complete linkage of defining the hierarchical clusters.
+
+```{r}
+normCounts_vst <- vst(dds_cpm_filtered_HTG1, blind = TRUE)
+trial <- assay(normCounts_vst)
+dim(trial)
+rownames(trial) <- NULL
+# colnames(trial) <- paste((sub("sample", "S", colnames(assay(normCounts_vst)))))
+## Heatmap after filtering by log2(cpm) > 0.05 & VST normalisation using pheatmap default parameters
+
+pheatmap(trial,
+         annotation_col = data.frame(Disease = coldata$condition2,
+                                     row.names = row.names(coldata)),
+         annotation_colors = list(Disease = sampleColor),
+         main = "Heatmap with Hierarchical Clustering of Gene Features (y-axis) \
+         and Sample (x-axis) Similarity - Euclidean Distances ")
+
+
+pheatmap(t(trial),
+         annotation_row = data.frame(Disease = coldata$condition2,
+                                     row.names = row.names(coldata)),
+         annotation_colors = list(Disease = sampleColor),
+         main = "Heatmap with Hierarchical Clustering of Sample (y-axis) \
+         and Gene Features (x-axis) Similarity - Euclidean Distances ")
+```
+
+=================================================================================== \### Exploring heatmap plotting on the HTSeq data
+
+```{r}
+normCounts_vst <- vst(dds_cpm_filtered_HTSeq1, blind = TRUE)
+sampleDist_vst <- cor(assay(normCounts_vst), method = "spearman")
+rownames(sampleDist_vst) <- NULL
+pheatmap(sampleDist_vst,
+         clustering_distance_rows = as.dist(1-sampleDist_vst),
+         clustering_distance_cols = as.dist(1-sampleDist_vst),
+         annotation_col = data.frame(Disease = sampleTable$condition,
+                                     row.names = sampleTable$sampleName),
+         annotation_colors = list(Disease = sampleColor),
+         main = "Heatmap after filtering by log2(cpm) > 0.05 &\
+         VST normalised approach - Spearman correlation")
+
+# https://dputhier.github.io/ASG/practicals/distances/distances.html#hierarchical_clustering_with_hclust
+# not sure which is the method to convert the Spearman's correlation to distances
+# these two plots give the same result
+
+pheatmap(sampleDist_vst,
+         clustering_distance_rows = as.dist((1-sampleDist_vst)/2),
+         clustering_distance_cols = as.dist((1-sampleDist_vst)/2),
+         annotation_col = data.frame(Disease = sampleTable$condition,
+                                     row.names = sampleTable$sampleName),
+         annotation_colors = list(Disease = sampleColor),
+         main = "Heatmap after filtering by log2(cpm) > 0.05 &\
+         VST normalised approach - Spearman correlation")
+```
+
+### using the "corrplot" to plot the correlation matrix
+
+```{r}
+sampleDist_vst <- cor(assay(normCounts_vst), method = "spearman")
+corrplot(sampleDist_vst)
+corrplot(sampleDist_vst,order = "hclust")
+corrplot(sampleDist_vst, is.corr = F)
+corrplot(sampleDist_vst, is.corr = F, order = "hclust")
+# corrplot(sampleDist_vst,order = "hclust",method = "number")
+```
+
+## Euclidean distance calculation
+
+#### by first having calculated the Euclidean Distance then plottin the heatmap
+
+```{r}
+euclidDist_vst <- dist(t(assay(normCounts_vst)), method = "euclidean")
+euclidDist_vst <- as.matrix(euclidDist_vst)
+corrplot(euclidDist_vst,is.corr = F)
+
+rownames(euclidDist_vst) <- NULL
+pheatmap(euclidDist_vst,
+         clustering_distance_cols = as.dist(euclidDist_vst),
+         clustering_distance_rows = as.dist(euclidDist_vst),
+         annotation_col = data.frame(Disease = sampleTable$condition,
+                                     row.names = sampleTable$sampleName),
+         annotation_colors = list(Disease = sampleColor),
+         main = "Heatmap after filtering by log2(cpm) > 0.05 &\
+         VST normalised approach - Euclidean Dist")
+```
+
+#### in this plot, I have just run 'pheatmap' giving it the VST-normlised HTG counts as the input. the default method for calculating hte distances is 'Euclidean' and complete linkage of defining the hierarchical clusters.
+
+```{r}
+normCounts_vst <- vst(dds_cpm_filtered_HTSeq1, blind = TRUE)
+trial <- assay(normCounts_vst)
+dim(trial)
+rownames(trial) <- NULL
+# colnames(trial) <- paste((sub("sample", "S", colnames(assay(normCounts_vst)))))
+## Heatmap after filtering by log2(cpm) > 0.05 & VST normalisation using pheatmap default parameters
+
+pheatmap(trial,
+         annotation_col = data.frame(Disease = sampleTable$condition,
+                                     row.names = sampleTable$sampleName),
+         annotation_colors = list(Disease = sampleColor),
+         main = "Heatmap with Hierarchical Clustering of Gene Features (y-axis) \
+         and Sample (x-axis) Similarity - Euclidean Distances ")
+
+
+pheatmap(t(trial),
+         annotation_row = data.frame(Disease = sampleTable$condition,
+                                     row.names = sampleTable$sampleName),
+         annotation_colors = list(Disease = sampleColor),
+         main = "Heatmap with Hierarchical Clustering of Sample (y-axis) \
+         and Gene Features (x-axis) Similarity - Euclidean Distances ")
+```
+
+=================================================================================== \#### Now, try plotting a correlation plot
+
+### using the "corrplot" to plot the correlation matrix
+
+```{r}
+# sampleDist_vst <- cor(assay(normCounts_vst), method = "spearman")
+sampleDist_vst <- cor(t(assay(normCounts_vst)), method = "spearman")
+corrplot(sampleDist_vst)
+corrplot(sampleDist_vst,order = "hclust")
+corrplot(sampleDist_vst, is.corr = F)
+corrplot(sampleDist_vst, is.corr = F, order = "hclust")
+# corrplot(sampleDist_vst,order = "hclust",method = "number")
+```
+
+```{r}
+
+sampleDist_vst_sample <- cor(assay(normCounts_vst), method = "spearman")
+sampleDist_vst_gene <- cor(t(assay(normCounts_vst)), method = "spearman")
+row.names(sampleDist_vst_gene) <- NULL
+colnames(sampleDist_vst_gene) <- NULL
+pheatmap(sampleDist_vst_gene,
+         clustering_distance_cols = as.dist(1 - sampleDist_vst_gene),
+         clustering_distance_rows = as.dist(1 - sampleDist_vst_gene),
+         main = "Heatmap after filtering by log2(cpm) > 0.05 &\
+         VST normalised approach - Spearman's Corr")
+
+pheatmap(sampleDist_vst_gene,
+         clustering_distance_cols = as.dist((1-sampleDist_vst_gene)/2),
+         clustering_distance_rows = as.dist((1-sampleDist_vst_gene)/2),
+         main = "Heatmap after filtering by log2(cpm) > 0.05 &\
+         VST normalised approach - Spearman's Corr")
+
+```
+
+```{r}
+pear.dist <- as.dist((1 - sampleDist_vst_gene)/2)
+hp <- hclust(pear.dist, method="average")
+plot(hp, hang=-1, cex=0.2)
+
+pear.dist <- as.dist(1 - sampleDist_vst_gene)
+hp <- hclust(pear.dist, method="average")
+plot(hp, hang=-1, cex=0.2)
+
+pear.dist <- as.dist((1 - sampleDist_vst_gene)/2)
+hp <- hclust(pear.dist, method="complete")
+plot(hp, hang=-1, cex=0.2)
+```

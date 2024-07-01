@@ -1,0 +1,836 @@
+---
+title: "Venn diagram"
+author: "Hildah Njoroge"
+date: "2023-07-26"
+output: html_document
+---
+
+# Create a demo data
+
+```{r}
+# set.seed(20190708)
+# genes <- paste("gene",1:1000,sep="")
+# x <- list(
+#   A = sample(genes,300), 
+#   B = sample(genes,525), 
+#   C = sample(genes,440),
+#   D = sample(genes,350)
+#   )
+# 
+# head(x$A) ; head(x$B) ; head(x$C) ; head(x$D)
+```
+
+# Create Venn diagrams using the ggVennDiagram R package
+
+## Install and load the ggVennDiagram package
+
+### Install
+
+```{r}
+if (!require(devtools)) {install.packages("devtools")}
+# devtools::install_github("gaospecial/ggVennDiagram") # install from GitHub
+```
+
+### Install necessary packages
+
+```{r}
+
+if (!require(devtools)) {install.packages("Rtools")}
+if (!require(devtools)) {install.packages("ggVennDiagram")}
+```
+
+## Load package
+
+```{r}
+library("ggVennDiagram")
+```
+
+```{r}
+# # Default plot
+# ggVennDiagram(x)
+# ggVennDiagram(x[1:3])
+```
+
+# Now trying with my data
+
+## Load data
+
+```{r}
+load("C:/hne_files/MSc_Bioinf/MScProject-main_C/MScProject-main_10.06.23/scripts/DEG_analysis/Gene_counts/htg_pipeline/deseq2_statistical_analysis_HTG.Rdata")
+```
+
+## Load data
+
+```{r}
+load("C:/hne_files/MSc_Bioinf/MScProject-main_C/MScProject-main_10.06.23/scripts/DEG_analysis/Gene_counts/hisat2_htseq_pipeline/deseq2_statistical_analysis_HTSeq.Rdata")
+```
+
+## create the list
+
+## This represents genes called differentially expressed between pipelines for the colitisOnly group
+
+### Here is a list of the genes that are both significant and relevant as defined by the logFC and FDR
+
+```{r}
+genelist <- list(htg = row.names(sigRes_HTG),
+          htseq = row.names(sigRes_HTSeq)) ; head(genelist$htg) ; head(genelist$htseq)
+
+genelist_colonly <- genelist 
+
+# # checking for overlap in the top 10 genes called significant and relevant
+# genelist <- list(htg = row.names(sigRes_HTG)[1:10],
+#           htseq = row.names(sigRes_HTSeq)[1:10]) ; head(genelist$htg) ; head(genelist$htseq)
+```
+
+## Plot the Venn D
+
+```{r}
+ggVennDiagram(genelist)
+ggVennDiagram(genelist, label_alpha = )
+ggVennDiagram(genelist, label_alpha = 1, category.names = c("HTG pipeline genes", "HTSeq pipeline genes"))+
+  ggplot2::scale_fill_gradient(low="darkred", high = "steelblue")
+
+ggVennDiagram(genelist, label_alpha = 1, category.names = c("HTG pipeline genes", "HTSeq pipeline genes"),show_intersect = TRUE)
+
+
+
+```
+
+
+### to convert the Venn diagram above to a Euler diagram
+
+```{r}
+#Load the package
+library(VennDiagram)
+
+# move to new plotting page 
+grid.newpage() 
+
+# create pairwise Venn diagram 
+draw.pairwise.venn(area1=length(genelist$htg), 
+                   area2=length(genelist$htseq),
+                   cross.area=407, 
+                   category=c("HTG pipeline genes", "HTSeq pipeline genes"),
+                   fill=c("red","steelblue"),
+                   fontface = "bold",
+                   cex = 1.8,
+                   ext.text = F,
+                   cat.just = rep(list(c(0.5,0.4)), 2),
+                   cat.dist = rep(0.03, 2),
+                   cat.fontface = rep("bold", 2),
+                   cat.cex = 1.8,
+                   cat.pos = c(-30,30)
+)
+
+```
+
+#### An attempt to plot the Venn diagram using Pythom
+```{python}
+# #instal matplotlib-venn module
+# # pip install matplotlib-venn 
+# # 
+# # import modules
+# from matplotlib_venn import venn2
+# from matplotlib import pyplot as plt
+# 
+# # depict venn diagram
+# 
+# # venn2(subsets = (32,21,407), set_labels = ('Group A', 'Group B'))
+# venn2(subsets = (50, 10, 7), set_labels = ('Group A', 'Group B'))
+# plt.show()
+
+ 
+```
+
+
+
+## create the list
+
+## This represents genes called differentially expressed between pipelines for the colitis_nodysplasia group
+
+```{r}
+genelist <- list(htg = row.names(sigRes_HTG_Colnodysp),
+          htseq = row.names(sigRes_HTSeq_Colnodysp)) ; head(genelist$htg) ; head(genelist$htseq)
+
+genelist_colnodys <- genelist
+```
+
+## Plot the Venn Diagram
+
+```{r}
+ggVennDiagram(genelist)
+ggVennDiagram(genelist, label_alpha = )
+ggVennDiagram(genelist, label_alpha = 1, category.names = c("HTG pipeline genes", "HTSeq pipeline genes"))+
+  ggplot2::scale_fill_gradient(low="darkred", high = "steelblue")
+
+ggVennDiagram(genelist, label_alpha = 1, category.names = c("HTG pipeline genes", "HTSeq pipeline genes"),show_intersect = TRUE)
+
+```
+
+### to convert the Venn diagram above to a Euler diagram
+
+```{r}
+# load Venn diagram package 
+library("VennDiagram") 
+
+# move to new plotting page 
+grid.newpage() 
+
+# create pairwise Venn diagram 
+draw.pairwise.venn(area1=length(genelist$htg), 
+                   area2=length(genelist$htseq),
+                   cross.area=424, 
+                   category=c("HTG pipeline genes", "HTSeq pipeline genes"),
+                   fill=c("red","steelblue"),
+                   fontface = "bold",
+                   cex = 1.8,
+                   ext.text = F,
+                   cat.just = rep(list(c(0.5,0.4)), 2),
+                   cat.dist = rep(0.03, 2),
+                   cat.fontface = rep("bold", 2),
+                   cat.cex = 1.8,
+                   cat.pos = c(-30,30)
+)
+
+```
+
+
+
+## create the list
+
+## This represents genes called differentially expressed between pipelines for the noColitis vs colitis_dysplasia groups
+
+```{r}
+genelist <- list(htg = row.names(sigRes_HTG_Coldysp),
+          htseq = row.names(sigRes_HTSeq_Coldysp)) ; head(genelist$htg) ; head(genelist$htseq)
+
+genelist_coldys <- genelist
+
+# # checking for overlap in the top 20 genes called significant and relevant
+# genelist <- list(htg = row.names(sigRes_HTG_Coldysp)[1:20],
+#           htseq = row.names(sigRes_HTSeq_Coldysp)[1:20]) ; head(genelist$htg) head(genelist$htseq)
+```
+
+## Plot the Venn Diagram
+
+```{r}
+ggVennDiagram(genelist)
+ggVennDiagram(genelist, label_alpha = )
+ggVennDiagram(genelist, label_alpha = 1, category.names = c("HTG pipeline genes", "HTSeq pipeline genes"))+
+  ggplot2::scale_fill_gradient(low="darkred", high = "steelblue")
+
+ggVennDiagram(genelist, label_alpha = 1, category.names = c("HTG pipeline genes", "HTSeq pipeline genes"),show_intersect = TRUE)
+
+```
+
+
+### to convert the Venn diagram above to a Euler diagram
+```{r}
+# move to new plotting page 
+grid.newpage() 
+
+# create pairwise Venn diagram 
+draw.pairwise.venn(area1=length(genelist$htg), 
+                   area2=length(genelist$htseq),
+                   cross.area=446, 
+                   category=c("HTG pipeline genes", "HTSeq pipeline genes"),
+                   fill=c("red","steelblue"),
+                   fontface = "bold",
+                   cex = 1.8,
+                   ext.text = F,
+                   cat.just = rep(list(c(0.5,0.4)), 2),
+                   cat.dist = rep(0.03, 2),
+                   cat.fontface = rep("bold", 2),
+                   cat.cex = 1.8,
+                   cat.pos = c(-30,30)
+)
+
+```
+
+
+## In conclusion, the top number of DEG in the experimental groups compared to the control is the same in both pipelines
+## These results are based on the univariate analysis , which involves identifying single biomarkers that are differentially regulated between the groups compared in the analysis
+
+
+========================================================================================
+### contrasts with the reference group being the colitis only group
+
+
+## create the list
+
+## This represents genes called differentially expressed between pipelines for the Colitisonly vs colitis_nodysplasia groups
+
+```{r}
+genelist <- list(htg = row.names(sigRes_HTG_2_Colnodysp),
+          htseq = row.names(sigRes_HTSeq_2_Colnodysp)) ; head(genelist$htg) ; head(genelist$htseq)
+
+genelist_2colnodys <- genelist
+
+# # checking for overlap in the top 20 genes called significant and relevant
+# genelist <- list(htg = row.names(sigRes_HTG_Coldysp)[1:20],
+#           htseq = row.names(sigRes_HTSeq_Coldysp)[1:20]) ; head(genelist$htg) head(genelist$htseq)
+```
+
+## Plot the Venn Diagram
+
+```{r}
+ggVennDiagram(genelist)
+ggVennDiagram(genelist, label_alpha = )
+ggVennDiagram(genelist, label_alpha = 1, category.names = c("HTG pipeline genes", "HTSeq pipeline genes"))+
+  ggplot2::scale_fill_gradient(low="darkred", high = "steelblue")
+
+ggVennDiagram(genelist, label_alpha = 1, category.names = c("HTG pipeline genes", "HTSeq pipeline genes"),show_intersect = TRUE)
+
+```
+
+
+### to convert the Venn diagram above to a Euler diagram
+```{r}
+# load Venn diagram package 
+library("VennDiagram") 
+
+# move to new plotting page 
+grid.newpage() 
+
+# create pairwise Venn diagram 
+draw.pairwise.venn(area1=length(genelist$htg), 
+                   area2=length(genelist$htseq),
+                   cross.area=25, 
+                   category=c("HTG pipeline genes", "HTSeq pipeline genes"),
+                   fill=c("red","steelblue"),
+                   fontface = "bold",
+                   cex = 1.8,
+                   ext.text = F,
+                   cat.just = rep(list(c(0.5,0.4)), 2),
+                   cat.dist = rep(0.03, 2),
+                   cat.fontface = rep("bold", 2),
+                   cat.cex = 1.8,
+                   cat.pos = c(-150,150)
+)
+```
+
+
+## create the list
+
+## This represents genes called differentially expressed between pipelines for the Colitisonly vs colitis_dysplasia groups
+
+```{r}
+genelist <- list(htg = row.names(sigRes_HTG_2_Coldysp),
+          htseq = row.names(sigRes_HTSeq_2_Coldysp)) ; head(genelist$htg) ; head(genelist$htseq)
+
+genelist_2coldys <- genelist
+
+# # checking for overlap in the top 20 genes called significant and relevant
+# genelist <- list(htg = row.names(sigRes_HTG_Coldysp)[1:20],
+#           htseq = row.names(sigRes_HTSeq_Coldysp)[1:20]) ; head(genelist$htg) head(genelist$htseq)
+```
+
+## Plot the Venn Diagram
+
+```{r}
+ggVennDiagram(genelist)
+ggVennDiagram(genelist, label_alpha = )
+ggVennDiagram(genelist, label_alpha = 1, category.names = c("HTG pipeline genes", "HTSeq pipeline genes"))+
+  ggplot2::scale_fill_gradient(low="darkred", high = "steelblue")
+
+ggVennDiagram(genelist, label_alpha = 1, category.names = c("HTG pipeline genes", "HTSeq pipeline genes"),show_intersect = TRUE)
+
+```
+
+
+### to convert the Venn diagram above to a Euler diagram
+```{r}
+# load Venn diagram package 
+library("VennDiagram") 
+
+# move to new plotting page 
+grid.newpage() 
+
+# create pairwise Venn diagram 
+draw.pairwise.venn(area1=length(genelist$htg), 
+                   area2=length(genelist$htseq),
+                   cross.area=15, 
+                   category=c("HTG pipeline genes", "HTSeq pipeline genes"),
+                   fill=c("red","steelblue"),
+                   fontface = "bold",
+                   cex = 1.8,
+                   ext.text = F,
+                   cat.just = rep(list(c(0.5,0.4)), 2),
+                   cat.dist = rep(0.03, 2),
+                   cat.fontface = rep("bold", 2),
+                   cat.cex = 1.8,
+                   cat.pos = c(-30,30)
+)
+```
+
+
+
+## create the list
+
+## This represents genes called differentially expressed between pipelines for the Colitisonly vs colitis_dysplasia groups
+
+```{r}
+genelist <- list(htg = row.names(sigRes_HTG_3_Colnodysp),
+          htseq = row.names(sigRes_HTSeq_3_Colnodysp)) ; head(genelist$htg) ; head(genelist$htseq)
+
+genelist_3colnodys <- genelist
+
+# # checking for overlap in the top 20 genes called significant and relevant
+# genelist <- list(htg = row.names(sigRes_HTG_Coldysp)[1:20],
+#           htseq = row.names(sigRes_HTSeq_Coldysp)[1:20]) ; head(genelist$htg) head(genelist$htseq)
+```
+
+## Plot the Venn Diagram
+
+```{r}
+ggVennDiagram(genelist)
+ggVennDiagram(genelist, label_alpha = )
+ggVennDiagram(genelist, label_alpha = 1, category.names = c("HTG pipeline genes", "HTSeq pipeline genes"))+
+  ggplot2::scale_fill_gradient(low="darkred", high = "steelblue")
+
+ggVennDiagram(genelist, label_alpha = 1, category.names = c("HTG pipeline genes", "HTSeq pipeline genes"),show_intersect = TRUE)
+
+```
+
+
+### to convert the Venn diagram above to a Euler diagram
+
+# load Venn diagram package 
+library("VennDiagram") 
+```{r}
+# move to new plotting page 
+grid.newpage() 
+
+# create pairwise Venn diagram 
+draw.pairwise.venn(area1=length(genelist$htg), 
+                   area2=length(genelist$htseq),
+                   cross.area=86, 
+                   category=c("HTG pipeline genes", "HTSeq pipeline genes"),
+                   fill=c("red","steelblue"),
+                   fontface = "bold",
+                   cex = 1.8,
+                   ext.text = F,
+                   cat.just = rep(list(c(0.5,0.4)), 2),
+                   cat.dist = rep(0.03, 2),
+                   cat.fontface = rep("bold", 2),
+                   cat.cex = 1.8,
+                   cat.pos = c(-30,30)
+)
+
+```
+
+## Save the results as an R image
+
+```{r}
+save.image("C:/hne_files/MSc_Bioinf/MScProject-main_C/MScProject-main_10.06.23/scripts/DEG_analysis/Gene_counts/htg_hisat2-htseq_pipeline_overlap.Rdata")
+```
+
+========================================================================================
+# Comparing raw gene names identified as features by the HISAT2 compared to the Mouse Ref panel by HTG   
+
+## before filtering for the first Venn diagram, and after filtering by log2(CPM) > 0.05 for the second Venn diagram
+## 30.10.2023 -->  rerun this section with the meanLog2CPM > 0.1 cut-off up from 0.05
+
+```{r}
+raw_genes <- list(HTG = row.names(counts(ddsHTG)),
+                  HTSeq = row.names(counts(ddsHTSeq)))
+ggVennDiagram(raw_genes)
+
+raw_genes <- list(HTG = row.names(counts(dds_cpm_filtered_HTG1)),
+                  HTSeq = row.names(counts(dds_cpm_filtered_HTSeq1)))
+ggVennDiagram(raw_genes)
+```
+
+
+### to convert the Venn diagram above to a Euler diagram
+
+```{r}
+# load Venn diagram package 
+library("VennDiagram") 
+
+# move to new plotting page 
+grid.newpage() 
+
+# create pairwise Venn diagram 
+draw.pairwise.venn(area1=length(raw_genes$HTG), 
+                   area2=length(raw_genes$HTSeq),
+                   cross.area=1610, 
+                   category=c("HTG pipeline genes", "HTSeq pipeline genes"),
+                   fill=c("red","steelblue"),
+                   fontface = "bold",
+                   cex = 1.2,
+                   ext.text = F,
+                   cat.just = rep(list(c(0.5,0.4)), 2),
+                   cat.dist = rep(0.03, 2),
+                   cat.fontface = rep("bold", 2),
+                   cat.cex = 1.2,
+                   cat.pos = c(-30,30)
+)
+```
+
+
+## after filtering by log2(CPM) > 1
+```{r}
+# cpm_filtered_genes <- list(HTG = row.names(counts(dds_cpm_filtered_HTG)),
+#                   HTSeq = row.names(counts(dds_cpm_filtered_HTSeq)))
+# ggVennDiagram(cpm_filtered_genes)
+```
+
+## after filtering by raw counts > 10
+
+```{r}
+# filtered_genes <- list(HTG = row.names(counts(dds_rowSums_greaterthan_10_HTG)),
+#                   HTSeq = row.names(counts(dds_rowSums_greaterthan_10_HTSeq)))
+# ggVennDiagram(filtered_genes)
+
+```
+
+
+```{r}
+filtered_genes <- list(HTG = row.names(counts(dds_cpm_filtered_HTG1)),
+                  HTSeq = row.names(counts(dds_cpm_filtered_HTSeq1)))
+ggVennDiagram(filtered_genes)
+```
+
+
+```{r}
+paste("No. of genes uniquely present in the HTG Pipeline are", length(exclusive_HTG <- setdiff(filtered_genes$HTG,filtered_genes$HTSeq)))
+(exclusive_HTG <- setdiff(filtered_genes$HTG,filtered_genes$HTSeq))
+
+paste("No. of genes uniquely present in the HTSeq Pipeline are", length(exclusive_HTSeq <- setdiff(filtered_genes$HTSeq,filtered_genes$HTG)))
+(exclusive_HTSeq <- setdiff(filtered_genes$HTSeq,filtered_genes$HTG))
+```
+#### note; Need to be certain that the gene names are consistent between the two pipelines. e.g., Ifna- family versus Ifna1,15,16,6, or the Ifnl2_Ifnl3 versus Ifnl2, Ifnl3... NOW WE KNOW THAT THE NAMING OF THE GENES CAN BE A CONTRIBUTING FACTOR TO THE DISPERITy BETWEEN THE TWO PIPELINES.
+
+```{r}
+# exclusive_HTG_HTSeq_filtered <- data.frame(htg=exclusive_HTSeq, 
+#                                            htseq=exclusive_HTG)
+# head(exclusive_HTG_HTSeq_filtered)
+```
+
+
+```{r}
+# Make sure both vectors have the same length
+(length_htg <- length(exclusive_HTG))
+(length_htseq <- length(exclusive_HTSeq))
+
+# Add NA values to the shorter vector to match lengths
+exclusive_HTG_withNA <- exclusive_HTG
+exclusive_HTSeq_withNA <- exclusive_HTSeq
+
+if (length_htg < length_htseq) {
+  exclusive_HTG_withNA <- c(exclusive_HTG, rep(NA, length_htseq - length_htg))
+  print("first condition met")
+} else if (length_htseq < length_htg) {
+  exclusive_HTSeq_withNA <- c(exclusive_HTSeq, rep(NA, length_htg - length_htseq))
+  print("second condition met")
+}
+
+# Now both vectors have the same length, and I can create the data frame
+exclusive_HTG_HTSeq_filtered <- data.frame(htg = exclusive_HTG_withNA, htseq = exclusive_HTSeq_withNA)
+head(exclusive_HTG_HTSeq_filtered)
+
+```
+
+
+```{r}
+write.csv(exclusive_HTG_HTSeq_filtered,file = "C:/hne_files/MSc_Bioinf/MScProject-main_C/MScProject-main_10.06.23/results/pipeline_comparisons/exclusive_HTG_HTSeq_filtered.csv")
+```
+
+
+
+
+
+## check whether these genes uniquely present in the HTG gene panel are significantly differentially regulated
+
+## in the colitis only
+```{r}
+in_htg <- list("exclusive in HTG" = exclusive_HTG,"sigRes in HTG" = row.names(sigRes_HTG) )
+ggVennDiagram(in_htg)
+
+```
+The above Venn Diagramm shows that 12 of the 49 genes uniquely present in HTG noCol vs Colonly samples are found to be statistically significantly DE
+
+
+### to convert the Venn diagram above to a Euler diagram
+```{r}
+# load Venn diagram package 
+library("VennDiagram") 
+
+# move to new plotting page 
+grid.newpage() 
+
+# create pairwise Venn diagram 
+draw.pairwise.venn(area1=length(in_htg$`exclusive in HTG`), 
+                   area2=length(in_htg$`sigRes in HTG`),
+                   cross.area=12, 
+                   category=c("Exclusive in HTG", "Sig. and rel. in HTG"),
+                   fill=c("red","steelblue"),
+                   fontface = "bold",
+                   cex = 1.2,
+                   ext.text = F,
+                   cat.just = rep(list(c(0.5,0.4)), 2),
+                   cat.dist = rep(0.03, 2),
+                   cat.fontface = rep("bold", 2),
+                   cat.cex = 1.2,
+                   cat.pos = c(-5,0)
+)
+```
+
+
+```{r}
+in_htseq <- list("exclusive in HTSeq" = exclusive_HTSeq,"sigRes in HTSeq" = row.names(sigRes_HTSeq) )
+ggVennDiagram(in_htseq)
+```
+The above Venn diagram shows that 14 of the 56 genes uniquely present in noCol vs ColOnly samples of the HISAT2-HTSeq pipeline are called statistically significant (adj.Pvalue < 0.05) and relevant (an FDR of > 1)
+
+
+### to convert the Venn diagram above to a Euler diagram
+```{r}
+# load Venn diagram package 
+library("VennDiagram") 
+
+# move to new plotting page 
+grid.newpage() 
+
+# create pairwise Venn diagram 
+draw.pairwise.venn(area1=length(in_htseq$`exclusive in HTSeq`), 
+                   area2=length(in_htseq$`sigRes in HTSeq`),
+                   cross.area=14, 
+                   category=c("Exclusive in HTSeq", "Sig. and rel. in HTSeq"),
+                   fill=c("red","steelblue"),
+                   fontface = "bold",
+                   cex = 1.2,
+                   ext.text = F,
+                   cat.just = rep(list(c(0.5,0.4)), 2),
+                   cat.dist = rep(0.03, 2),
+                   cat.fontface = rep("bold", 2),
+                   cat.cex = 1.2,
+                   cat.pos = c(-5,0)
+)
+```
+
+
+
+
+
+=======================
+
+## check whether these genes uniquely present in the HTG gene panel are significantly differentially regulated
+
+## in the col_dysp group
+
+```{r}
+in_htg <- list("exclusive in HTG" = exclusive_HTG,"sigRes in HTG" = row.names(sigRes_HTG_Coldysp) )
+ggVennDiagram(in_htg)
+
+```
+The above Venn Diagramm shows that 12 of the 49 genes uniquely present in HTG noCol vs Colonly samples are found to be statistically significantly DE
+
+
+### to convert the Venn diagram above to a Euler diagram
+```{r}
+# load Venn diagram package 
+library("VennDiagram") 
+
+# move to new plotting page 
+grid.newpage() 
+
+# create pairwise Venn diagram 
+draw.pairwise.venn(area1=length(in_htg$`exclusive in HTG`), 
+                   area2=length(in_htg$`sigRes in HTG`),
+                   cross.area=13, 
+                   category=c("Exclusive in HTG", "Sig. and rel. in HTG"),
+                   fill=c("red","steelblue"),
+                   fontface = "bold",
+                   cex = 1.2,
+                   ext.text = F,
+                   cat.just = rep(list(c(0.5,0.4)), 2),
+                   cat.dist = rep(0.03, 2),
+                   cat.fontface = rep("bold", 2),
+                   cat.cex = 1.2,
+                   cat.pos = c(-5,0)
+)
+```
+
+
+```{r}
+in_htseq <- list("exclusive in HTSeq" = exclusive_HTSeq,"sigRes in HTSeq" = row.names(sigRes_HTSeq_Coldysp) )
+ggVennDiagram(in_htseq)
+```
+The above Venn diagram shows that 14 of the 56 genes uniquely present in noCol vs ColOnly samples of the HISAT2-HTSeq pipeline are called statistically significant (adj.Pvalue < 0.05) and relevant (an FDR of > 1)
+
+
+### to convert the Venn diagram above to a Euler diagram
+```{r}
+# load Venn diagram package 
+library("VennDiagram") 
+
+# move to new plotting page 
+grid.newpage() 
+
+# create pairwise Venn diagram 
+draw.pairwise.venn(area1=length(in_htseq$`exclusive in HTSeq`), 
+                   area2=length(in_htseq$`sigRes in HTSeq`),
+                   cross.area=11, 
+                   category=c("Exclusive in HTSeq", "Sig. and rel. in HTSeq"),
+                   fill=c("red","steelblue"),
+                   fontface = "bold",
+                   cex = 1.2,
+                   ext.text = F,
+                   cat.just = rep(list(c(0.5,0.4)), 2),
+                   cat.dist = rep(0.03, 2),
+                   cat.fontface = rep("bold", 2),
+                   cat.cex = 1.2,
+                   cat.pos = c(-5,0)
+)
+```
+===================================================================================
+
+## after filtering by log2(CPM) > 0.05
+
+###### First, create a list of the (raw) genes filtered by the above criteria and plot the Venn Diagram
+
+```{r}
+filtered_genes <- list(HTG = row.names(counts(dds_cpm_filtered_HTG1)),
+                  HTSeq = row.names(counts(dds_cpm_filtered_HTSeq1)))
+ggVennDiagram(filtered_genes)
+```
+###### Second, have a list of the unique genes in each pipeline, i.e., of the 49 and 56 genes in the HTG and HTseq pipelines, respectively
+
+
+```{r}
+paste("No. of genes uniquely present in the HTG Pipeline are", length(exclusive_HTG <- setdiff(filtered_genes$HTG,filtered_genes$HTSeq)))
+(exclusive_HTG <- setdiff(filtered_genes$HTG,filtered_genes$HTSeq))
+
+paste("No. of genes uniquely present in the HTSeq Pipeline are", length(exclusive_HTSeq <- setdiff(filtered_genes$HTSeq,filtered_genes$HTG)))
+(exclusive_HTSeq <- setdiff(filtered_genes$HTSeq,filtered_genes$HTG))
+```
+
+#### note; Need to be certain that the gene names are consistent between the two pipelines. e.g., Ifna- family versus Ifna1,15,16,6, or the Ifnl2_Ifnl3 versus Ifnl2, Ifnl3... NOW WE KNOW THAT THE NAMING OF THE GENES CAN BE A CONTRIBUTING FACTOR TO THE DISPERITy BETWEEN THE TWO PIPELINES.
+
+```{r}
+exclusive_HTG_HTSeq_filtered <- data.frame(htg=exclusive_HTSeq, 
+                                           htseq=exclusive_HTG)
+head(exclusive_HTG_HTSeq_filtered)
+```
+
+
+```{r}
+# Make sure both vectors have the same length
+(length_htg <- length(exclusive_HTG))
+(length_htseq <- length(exclusive_HTSeq))
+
+# Add NA values to the shorter vector to match lengths
+if (length_htg < length_htseq) {
+  exclusive_HTG <- c(exclusive_HTG, rep(NA, length_htseq - length_htg))
+} else if (length_htseq < length_htg) {
+  exclusive_HTSeq <- c(exclusive_HTSeq, rep(NA, length_htg - length_htseq))
+}
+
+# Now both vectors have the same length, and I can create the data frame
+exclusive_HTG_HTSeq_filtered <- data.frame(htg = exclusive_HTG, htseq = exclusive_HTSeq)
+head(exclusive_HTG_HTSeq_filtered)
+
+```
+
+
+```{r}
+write.csv(exclusive_HTG_HTSeq_filtered,file = "C:/hne_files/MSc_Bioinf/MScProject-main_C/MScProject-main_10.06.23/scripts/DEG_analysis/Gene_counts/exclusive_HTG_HTSeq_filtered.csv")
+```
+
+```{bash}
+#!/bin/bash
+
+#path=/mnt/c/hne_files/MSc_Bioinf/MScProject-main_C/MScProject-main_10.06.23/scripts/DEG_analysis/Gene_counts
+#path=C:/hne_files/MSc_Bioinf/MScProject-main_C/MScProject-main_10.06.23/scripts/DEG_analysis/Gene_counts
+
+path=C:/hne_files/MSc_Bioinf/MScProject-main_C/MScProject-main_10.06.23/results/pipeline_comparisons
+
+list1=`cut -d "," ${path}/exclusive_HTG_HTSeq_filtered.csv -f2`
+list2=`cut -d "," ${path}/exclusive_HTG_HTSeq_filtered.csv -f3`
+
+for string1 in ${list1};
+do 
+for string2 in ${list2};
+    do
+    # echo "${string1:0:4},${string2}"
+
+    if [ "${string1:0:4}" = "${string2:0:4}" ]; then
+    echo "${string1},${string2}" 
+fi
+    done
+done > ${path}/present_in_both_P_3char.csv
+# done > ${path}/trial_file.txt
+
+
+for string1 in ${list1};
+do 
+for string2 in ${list2};
+    do
+    # echo "${string1:0:4},${string2}"
+
+    if [ "${string1:0:5}" = "${string2:0:5}" ]; then
+    echo "${string1},${string2}" 
+fi
+    done
+done > ${path}/present_in_both_P_4char.csv
+echo "done"
+```
+
+
+
+
+## check whether these genes uniquely present in the HTG gene panel are significantly differentially regulated 
+### NOTE! THIS LIST NOW CONTAINS THE "NA" VALUES
+
+```{r}
+exclusive_HTG
+in_htg <- list("exclusive in HTG" = exclusive_HTG,"sigRes in HTG" = row.names(sigRes_HTG) )
+ggVennDiagram(in_htg)
+
+```
+The above Venn Diagramm shows that 12 of the 47 genes uniquely present in HTG noCol vs Colonly samples are found to be statistically significantly DE
+
+### save these genes as a .csv file
+```{r}
+length(intersect(exclusive_HTG,row.names(sigRes_HTG)))
+intersect(exclusive_HTG,row.names(sigRes_HTG))
+in_htg2 <- data.frame("htg" = intersect(exclusive_HTG,row.names(sigRes_HTG))) ; in_htg2
+```
+
+```{r}
+in_htseq <- list("exclusive in HTSeq" = exclusive_HTSeq,"sigRes in HTSeq" = row.names(sigRes_HTSeq) )
+ggVennDiagram(in_htseq)
+```
+The above Venn diagram shows that 13 of the 65 genes uniquely present in noCol vs ColOnly samples of the HISAT2-HTSeq pipeline are called statistically significant (adj.Pvalue < 0.05) and relevant (an FDR of > 1)
+
+```{r}
+length(intersect(exclusive_HTSeq,row.names(sigRes_HTSeq)))
+in_htseq2 <- data.frame("htseq" = intersect(exclusive_HTSeq,row.names(sigRes_HTSeq))) ; in_htseq2
+
+```
+
+## Write these genes diff in the colOnly in a .csv file
+```{r}
+# Make sure both vectors have the same length
+(length_htg <- nrow(in_htg2))
+(length_htseq <- nrow(in_htseq2))
+
+# Add NA values to the shorter vector to match lengths
+if (length_htg < length_htseq) {
+  na_to_add <- (rep(NA, length_htseq - length_htg))
+  in_htg2 <- rbind(in_htg2, na_to_add)
+} else if (length_htseq < length_htg) {
+  in_htseq2 <- c(in_htseq2, rep(NA, length_htg - length_htseq))
+}
+
+(length_htg <- nrow(in_htg2))
+(length_htseq <- nrow(in_htseq2))
+
+# Now both vectors have the same length, and I can create the data frame
+data_frame <- data.frame("htg" <- in_htg2, "htseq" = in_htseq2)
+data_frame
+write.csv(data_frame, file = "C:/hne_files/MSc_Bioinf/MScProject-main_C/MScProject-main_10.06.23/results/pipeline_comparisons/DEG_in_colonly_exclusively_present_in_pipelines.csv")
+```
+

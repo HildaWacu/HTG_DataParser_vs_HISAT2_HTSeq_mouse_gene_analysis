@@ -1,0 +1,115 @@
+htseq                    /home/hne/anaconda3/envs/htseq
+./read_quant_htseq.sh: 15: source: not found
+
+CommandNotFoundError: Your shell has not been properly configured to use 'conda activate'.
+To initialize your shell, run
+
+    $ conda init <SHELL_NAME>
+
+Currently supported shells are:
+  - bash
+  - fish
+  - tcsh
+  - xonsh
+  - zsh
+  - powershell
+
+See 'conda init --help' for more information and options.
+
+IMPORTANT: You may need to close and restart your shell after running 'conda init'.
+
+
+htseq-count -f bam     -s no     -t exon     -i gene_id     --additional-attr=gene_name --additional-attr=exon_number     -m union     --nonunique none     sample_1_sorted.bam /genomic.gtf > counts.txt
+Finished quantifying reads
+0 seconds
+0 minutes and 0 seconds elapsed
+ 
+##############################################################################################################
+htseq                    /home/hne/anaconda3/envs/htseq
+./read_quant_htseq.sh: 15: source: not found
+
+CommandNotFoundError: Your shell has not been properly configured to use 'conda activate'.
+To initialize your shell, run
+
+    $ conda init <SHELL_NAME>
+
+Currently supported shells are:
+  - bash
+  - fish
+  - tcsh
+  - xonsh
+  - zsh
+  - powershell
+
+See 'conda init --help' for more information and options.
+
+IMPORTANT: You may need to close and restart your shell after running 'conda init'.
+
+
+htseq-count -f bam     -s no     -t exon     -i gene_id     --additional-attr=gene_name --additional-attr=exon_number     -m union     --nonunique none     sample_1_sorted.bam ''/genomic.gtf > counts.txt
+Finished quantifying reads
+0 seconds
+0 minutes and 0 seconds elapsed
+ 
+##############################################################################################################
+htseq                    /home/hne/anaconda3/envs/htseq
+./read_quant_htseq.sh: 15: source: not found
+
+CommandNotFoundError: Your shell has not been properly configured to use 'conda activate'.
+To initialize your shell, run
+
+    $ conda init <SHELL_NAME>
+
+Currently supported shells are:
+  - bash
+  - fish
+  - tcsh
+  - xonsh
+  - zsh
+  - powershell
+
+See 'conda init --help' for more information and options.
+
+IMPORTANT: You may need to close and restart your shell after running 'conda init'.
+
+
+htseq-count -f bam     -s no     -t exon     -i gene_id     --additional-attr=gene_name --additional-attr=exon_number     -m union     --nonunique none     sample_1_sorted.bam '/mnt/d/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27'/genomic.gtf > counts.txt
+Finished quantifying reads
+0 seconds
+0 minutes and 0 seconds elapsed
+ 
+##############################################################################################################
+htseq                    /home/hne/anaconda3/envs/htseq
+./read_quant_htseq.sh: 15: source: not found
+
+CommandNotFoundError: Your shell has not been properly configured to use 'conda activate'.
+To initialize your shell, run
+
+    $ conda init <SHELL_NAME>
+
+Currently supported shells are:
+  - bash
+  - fish
+  - tcsh
+  - xonsh
+  - zsh
+  - powershell
+
+See 'conda init --help' for more information and options.
+
+IMPORTANT: You may need to close and restart your shell after running 'conda init'.
+
+
+htseq-count -f bam     -s no     -t exon     -i gene_id     --additional-attr=gene_name --additional-attr=exon_number     -m union     --nonunique none     sample_1_sorted.bam /mnt/d/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gtf > counts.txt
+Finished quantifying reads
+0 seconds
+0 minutes and 0 seconds elapsed
+ 
+##############################################################################################################
+htseq                    /home/hne/anaconda3/envs/htseq
+htseq-count -f bam     -s no     -t exon     -i gene_id     --additional-attr=gene_name --additional-attr=exon_number     -m union     --nonunique none     sample_1_sorted.bam /mnt/d/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gtf > counts.txt
+Finished quantifying reads
+0 seconds
+0 minutes and 0 seconds elapsed
+ 
+##############################################################################################################

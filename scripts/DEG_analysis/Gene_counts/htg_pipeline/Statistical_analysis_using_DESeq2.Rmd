@@ -1,0 +1,826 @@
+---
+title: "Statistical analysis using DESeq2"
+author: "Hildah Njoroge"
+date: "2023-07-25"
+output: html_document
+---
+
+## Load the data from the HTG pipeline
+
+```{r}
+# load("C:/hne_files/MSc_Bioinf/MScProject-main_C/MScProject-main_10.06.23/scripts/DEG_analysis/Gene_counts/htg_pipeline/htg_dds_filtering.Rdata")
+
+load("C:/hne_files/MSc_Bioinf/MScProject-main_C/MScProject-main_10.06.23/scripts/DEG_analysis/Gene_counts/filtering_criteria.Rdata")
+```
+
+## Load the data from the HTSeq pipeline
+
+```{r}
+# load("C:/hne_files/MSc_Bioinf/MScProject-main_C/MScProject-main_10.06.23/scripts/DEG_analysis/Gene_counts/hisat2_htseq_pipeline/htseq_dds_filtering.Rdata")
+```
+
+
+## Assumptions of a linear model (and why we have considered a generalised linear model)
+1. linearity of predictor and response variables , i.e., changes in these two variables are proportional and consistent
+2. Homoskedasticity, i.e., reponse variable variance is the same for all the mean values of the predoctor variables
+3. Normally distributed (reponse?)
+4. independent observations
+
+```{r}
+hist(counts(ddsHTG), ylim = c(0,5000))
+hist(counts(dds_cpm_filtered_HTG1), ylim = c(0,5000))
+# hist(rowMeans(log2(cpm(counts(dds)) + 1)))
+```
+
+#### QQ plots of the data
+```{r}
+# hist(counts(dds_rowSums_greaterthan_10_HTSeq), ylim = c(0,5000))
+qqnorm(counts(dds_cpm_filtered_HTG1), ylim = c(0,5000))
+qqline(counts(dds_cpm_filtered_HTG1), ylim = c(0,5000))
+# hist(rowMeans(log2(cpm(counts(dds)) + 1)))
+```
+
+```{r}
+# hist(counts(dds_rowSums_greaterthan_10_HTSeq), ylim = c(0,5000))
+# # hist(rowMeans(log2(cpm(counts(dds)) + 1)))
+```
+
+
+## Attempting to draw QQ plot of the count data --> FAILED
+
+
+```{r}
+# # Example data (replace this with your raw gene count data)
+# # (counts_data <- matrix(rnbinom(1000, mu = 20, size = 2), ncol = 1))
+# head(counts_data <- countTable)
+# 
+# # Calculate quantiles of the theoretical normal distribution
+# theoretical_quantiles <- qnorm(ppoints(nrow(counts_data)))
+# 
+# # Calculate quantiles of the observed data
+# observed_quantiles <- quantile(counts_data, ppoints(nrow(counts_data)))
+# 
+# # Create a data frame for the Q-Q plot
+# qq_plot_data <- data.frame(Theoretical = theoretical_quantiles, Observed = observed_quantiles)
+# 
+# plot(qq_plot_data)
+
+# Create the Q-Q plot using ggplot2
+# ggplot(qq_plot_data, aes(x = Theoretical, y = Observed)) +
+#   geom_point() +
+#   geom_abline(intercept = 0, slope = 1, color = "red", linetype = "dashed") +
+#   xlab("Theoretical Quantiles") +
+#   ylab("Observed Quantiles") +
+#   ggtitle("Q-Q Plot of Raw Gene Count Data")
+
+```
+
+## Attempt to draw mean vs standard deviation scatter plot 
+
+
+
+# Steps to statistical analysis usng DESeq2
+
+## A. noColitis vs colitisOnly 
+
+## Step 1: Define design matrix
+
+
+```{r}
+
+# designMatrix <- model.matrix(~ 0 + disease + individual, data = sampleTable)
+designMatrix <- model.matrix(~ 0 + condition2, data = coldata)
+head(designMatrix)
+```
+
+## Step 2: Define contrast matrix
+### noColitis vs colitisOnly
+```{r}
+contrastMatrixCol <- makeContrasts(condition2colitisOnly - condition2noColitis, levels = designMatrix)
+
+head(contrastMatrixCol)
+
+```
+
+#Step 3: Fit model
+1. calculate the normalisation factors
+2. estimate the dispersion parameters
+3. fit the model to the data
+### HTG 
+```{r}
+
+countTable <- as.data.frame(counts(ddsHTG))
+(dge <- DGEList(countTable))
+(dge <- calcNormFactors(dge))
+(dge <- estimateDisp(dge, designMatrix, robust = TRUE))
+fit <- glmQLFit(dge, designMatrix, robust = TRUE)
+```
+
+## Step 4: Perform hypothesis testing
+### 1. Perform hypothesis testing
+```{r}
+(res <- glmQLFTest(fit, contrast = contrastMatrixCol))
+nrow(res)
+```
+
+### 2. filter genes, i.e., (i) create a table of top DEG (Tags) sorted by Pvalue
+
+```{r}
+(res <- topTags(res, n = nrow(countTable)))
+nrow(res)
+```
+
+### ... (ii) based on the level of significance (adjusted Pvalue, FDR adjusted Pvalue of 0.05) and the level of relevance (log2FC > 1, i.e., FC of at least 2)
+
+```{r}
+sigRes <- subset(res$table, FDR < 0.05 & abs(logFC) > 1)
+sigRes_HTG <- sigRes
+knitr::kable(head(sigRes))
+nrow(sigRes)
+```
+
+
+
+
+
+## To add a column of up- and down-regulated genes
+
+```{r}
+deg_reg <- data.frame("regulation" = NULL)
+
+#to confirm the number of DEG is correct
+nrow(sigRes_HTG); sum(nrow(subset(sigRes_HTG,sigRes_HTG$logFC > 1)),
+nrow(subset(sigRes_HTG,sigRes_HTG$logFC < 1)))
+
+
+for (i in sigRes_HTG$logFC) {
+  # print(i)
+  if (i > 1) {
+    new_row <- data.frame(regulation = "up")
+    deg_reg <- rbind(deg_reg,new_row)
+  } else {new_row <- data.frame(regulation = "down")
+    deg_reg <- rbind(deg_reg,new_row)}
+  }
+
+sigRes_HTG_reg <- cbind(sigRes_HTG, deg_reg)
+nrow(sigRes_HTG)
+```
+
+
+## Visualize results in a Volcano plot
+
+```{r}
+volcanoPlot <- ggplot(res$table,
+                      aes(x = logFC, y = -log10(FDR),
+                          color = ifelse(FDR < 0.05 & abs(logFC) > 1, "darkred", "grey"))) +
+  geom_point() +
+  xlab(expression("Fold Change, Log"[2]*"")) +
+  ylab(expression("Adjusted P value, Log"[10]*"")) +
+  geom_vline(xintercept = c(-1, 1), linetype = "dotted", linewidth = 1) +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted", linewidth = 1) +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  scale_colour_manual(values = c("darkred", "grey", "steelblue")) +
+  geom_text_repel(aes(x = logFC, y = -log10(FDR), label = rownames(res$table)[1:10],
+                      size = 2, color = "steelblue"),
+                  data = res$table[1:10, ])
+print(volcanoPlot)
+```
+
+# B. noColitis vs colitis_nodysplasia
+## Step 1: Define design matrix
+## Step 2: Define contrast matrix
+### noColitis vs colitis_nodysplasia
+
+```{r}
+contrastMatrixColnodysp <- makeContrasts(condition2colitis_nodysplasia - condition2noColitis, levels = designMatrix)
+
+head(contrastMatrixColnodysp)
+```
+
+#Step 3: Fit model
+1. calculate the normalisation factors
+2. estimate the dispersion parameters
+3. fit the model to the data
+### HTG 
+```{r}
+
+countTable <- as.data.frame(counts(ddsHTG))
+(dge <- DGEList(countTable))
+(dge <- calcNormFactors(dge))
+(dge <- estimateDisp(dge, designMatrix, robust = TRUE))
+fit <- glmQLFit(dge, designMatrix, robust = TRUE)
+```
+
+## Step 4: Perform hypothesis testing
+### 1. Perform hypothesis testing
+```{r}
+(res <- glmQLFTest(fit, contrast = contrastMatrixColnodysp))
+```
+
+### 2. filter genes, i.e., (i) create a table of top DEG (Tags) sorted by Pvalue
+
+```{r}
+(res <- topTags(res, n = nrow(countTable)))
+nrow(res)
+```
+
+### ... (ii) based on the level of significance (adjusted Pvalue, FDR adjusted Pvalue of 0.05) and the level of relevance (log2FC > 1, i.e., FC of at least 2)
+
+```{r}
+sigRes <- subset(res$table, FDR < 0.05 & abs(logFC) > 1)
+sigRes_HTG_Colnodysp <- sigRes
+knitr::kable(head(sigRes))
+nrow(sigRes)
+```
+
+## To add a column of up- and down-regulated genes
+
+```{r}
+deg_reg <- data.frame("regulation" = NULL)
+
+#to confirm the number of DEG is correct
+nrow(sigRes_HTG_Colnodysp); sum(nrow(subset(sigRes_HTG_Colnodysp,sigRes_HTG_Colnodysp$logFC > 1)),
+nrow(subset(sigRes_HTG_Colnodysp,sigRes_HTG_Colnodysp$logFC < 1)))
+
+
+for (i in sigRes_HTG_Colnodysp$logFC) {
+  # print(i)
+  if (i > 1) {
+    new_row <- data.frame(regulation = "up")
+    deg_reg <- rbind(deg_reg,new_row)
+  } else {new_row <- data.frame(regulation = "down")
+    deg_reg <- rbind(deg_reg,new_row)}
+  }
+
+sigRes_HTG_Colnodysp_reg <- cbind(sigRes_HTG_Colnodysp, deg_reg)
+nrow(sigRes_HTG_Colnodysp_reg)
+```
+
+
+## Visualize results in a Volcano plot
+
+```{r}
+volcanoPlot <- ggplot(res$table,
+                      aes(x = logFC, y = -log10(FDR),
+                          color = ifelse(FDR < 0.05 & abs(logFC) > 1, "darkred", "grey"))) +
+  geom_point() +
+  xlab(expression("Fold Change, Log"[2]*"")) +
+  ylab(expression("Adjusted P value, Log"[10]*"")) +
+  geom_vline(xintercept = c(-1, 1), linetype = "dotted", linewidth = 1) +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted", linewidth = 1) +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  scale_colour_manual(values = c("darkred", "grey", "steelblue")) +
+  geom_text_repel(aes(x = logFC, y = -log10(FDR), label = rownames(res$table)[1:10],
+                      size = 2, color = "steelblue"),
+                  data = res$table[1:10, ])
+print(volcanoPlot)
+```
+
+
+# C. noColitis vs colitis_dysplasia
+## Step 1: Define design matrix
+## Step 2: Define contrast matrix
+### noColitis vs colitis_dysplasia
+
+```{r}
+contrastMatrixColdysp <- makeContrasts(condition2colitis_dysplasia - condition2noColitis, levels = designMatrix)
+
+head(contrastMatrixColdysp)
+```
+
+
+#Step 3: Fit model
+1. calculate the normalisation factors
+2. estimate the dispersion parameters
+3. fit the model to the data
+### HTG 
+```{r}
+
+countTable <- as.data.frame(counts(ddsHTG))
+(dge <- DGEList(countTable))
+(dge <- calcNormFactors(dge))
+(dge <- estimateDisp(dge, designMatrix, robust = TRUE))
+fit <- glmQLFit(dge, designMatrix, robust = TRUE)
+```
+
+## Step 4: Perform hypothesis testing
+### 1. Perform hypothesis testing
+```{r}
+(res <- glmQLFTest(fit, contrast = contrastMatrixColdysp))
+```
+
+### 2. filter genes, i.e., (i) create a table of top DEG (Tags) sorted by Pvalue
+
+```{r}
+(res <- topTags(res, n = nrow(countTable))) # by default, sorted by adjusted Pvalue, BH correction and no adj Pvalue cutoff set
+nrow(res)
+(res <- topTags(res, n = nrow(countTable), adjust.method = "BH", sort.by = "PValue", p.value = 1))
+
+# (res <- topTags(res, n = 10, adjust.method = "BH", sort.by = "logFC", p.value = 0.05))
+```
+
+### ... (ii) based on the level of significance (adjusted Pvalue, FDR adjusted Pvalue of 0.05) and the level of relevance (log2FC > 1, i.e., FC of at least 2)
+
+```{r}
+sigRes <- subset(res$table, FDR < 0.05 & abs(logFC) > 1)
+sigRes_HTG_Coldysp <- sigRes
+knitr::kable(head(sigRes))
+nrow(sigRes)
+
+sigRes <- subset(res$table, PValue < 0.05 & FDR < 0.05 & abs(logFC)> 1)
+sigRes_HTG_Coldysp <- sigRes
+knitr::kable(head(sigRes))
+nrow(sigRes)
+
+sigRes <- subset(res$table, PValue < 0.05 & abs(logFC)> 1)
+nrow(sigRes)
+
+# knitr::kable(table(FDR = nrow(sigRes1), FDRnPvalue = nrow(sigRes2), Pvalue = nrow(sigRes3)))
+# ggVennDiagram(list(fdr=row.names(sigRes1), pvalue=row.names(sigRes2)))
+```
+
+
+
+## To add a column of up- and down-regulated genes
+
+```{r}
+deg_reg <- data.frame("regulation" = NULL)
+
+#to confirm the number of DEG is correct
+nrow(sigRes_HTG_Coldysp); sum(nrow(subset(sigRes_HTG_Coldysp,sigRes_HTG_Coldysp$logFC > 1)),
+nrow(subset(sigRes_HTG_Coldysp,sigRes_HTG_Coldysp$logFC < 1)))
+
+
+for (i in sigRes_HTG_Coldysp$logFC) {
+  # print(i)
+  if (i > 1) {
+    new_row <- data.frame(regulation = "up")
+    deg_reg <- rbind(deg_reg,new_row)
+  } else {new_row <- data.frame(regulation = "down")
+    deg_reg <- rbind(deg_reg,new_row)}
+  }
+
+sigRes_HTG_Coldysp_reg <- cbind(sigRes_HTG_Coldysp, deg_reg)
+nrow(sigRes_HTG_Coldysp_reg)
+```
+
+
+## Visualize results in a Volcano plot
+
+```{r}
+volcanoPlot <- ggplot(res$table,
+                      aes(x = logFC, y = -log10(FDR),
+                          color = ifelse(FDR < 0.05 & abs(logFC) > 1, "darkred", "grey"))) +
+  geom_point() +
+  xlab(expression("Fold Change, Log"[2]*"")) +
+  ylab(expression("Adjusted P value, Log"[10]*"")) +
+  geom_vline(xintercept = c(-1, 1), linetype = "dotted", linewidth = 1) +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted", linewidth = 1) +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  scale_colour_manual(values = c("darkred", "grey", "steelblue")) +
+  geom_text_repel(aes(x = logFC, y = -log10(FDR), label = rownames(res$table)[1:10],
+                      size = 2, color = "steelblue"),
+                  data = res$table[1:10, ])
+print(volcanoPlot)
+```
+
+```{r}
+# volcanoPlot <- ggplot(res$table,
+#                       aes(x = logFC, y = -log10(FDR),
+#                           color = ifelse(FDR < 0.05 & abs(logFC) > 1, "darkred", "grey"))) +
+#   geom_point() +
+#   xlab(expression("Fold Change, Log"[2]*"")) +
+#   ylab(expression("Adjusted P value, Log"[10]*"")) +
+#   geom_vline(xintercept = c(-1, 1), linetype = "dotted", linewidth = 1) +
+#   geom_hline(yintercept = -log10(0.05), linetype = "dotted", linewidth = 1) +
+#   theme_minimal() +
+#   theme(legend.position = "none") +
+#   scale_colour_manual(values = c("darkred", "grey", "steelblue")) +
+#   geom_text_repel(aes(x = logFC, y = -log10(Pvalue), label = rownames(res$table)[1:10],
+#                       size = 2, color = "steelblue"),
+#                   data = res$table[1:10, ])
+# print(volcanoPlot)
+```
+
+
+====== 
+# Identfy DEG among the diseased groups
+#### contrastMatrix2Colnodysp
+#### contrastMatrix2Coldysp
+#### contrastMatrix3Colnodysp
+
+
+# Define the contrast matrix
+
+### colitisOnly vs colitis_nodysplasia
+```{r}
+contrastMatrix2Colnodysp <- makeContrasts(condition2colitis_nodysplasia - condition2colitisOnly, levels = designMatrix)
+
+head(contrastMatrix2Colnodysp)
+```
+
+### colitisOnly vs colitis_dysplasia
+```{r}
+contrastMatrix2Coldysp <- makeContrasts(condition2colitis_dysplasia - condition2colitisOnly, levels = designMatrix)
+
+head(contrastMatrix2Coldysp)
+```
+
+### colitis_nodysplasia vs colitis_dysplasia
+```{r}
+contrastMatrix3Colnodysp <- makeContrasts(condition2colitis_dysplasia - condition2colitis_nodysplasia, levels = designMatrix)
+
+head(contrastMatrix3Colnodysp)
+```
+
+
+#Step 3: Fit model 
+1. calculate the normalisation factors 
+2. estimate the dispersion parameters 
+3. fit the model to the data 
+
+### HTG
+
+```{r}
+
+countTable <- as.data.frame(counts(dds_cpm_filtered_HTG1))
+(dge <- DGEList(countTable))
+(dge <- calcNormFactors(dge))
+(dge <- estimateDisp(dge, designMatrix, robust = TRUE))
+fit <- glmQLFit(dge, designMatrix, robust = TRUE)
+```
+
+## Step 4: Perform hypothesis testing
+
+### 1. Perform hypothesis testing
+
+### Colitisonly vs colnodysp
+
+```{r}
+(res <- glmQLFTest(fit, contrast = contrastMatrix2Colnodysp))
+nrow(res)
+```
+
+### 2. filter genes, i.e., (i) create a table of top DEG (Tags) sorted by Pvalue
+
+```{r}
+(res <- topTags(res, n = nrow(countTable)))
+nrow(res)
+```
+
+### ... (ii) based on the level of significance (adjusted Pvalue, FDR adjusted Pvalue of 0.05) and the level of relevance (log2FC \> 1, i.e., FC of at least 2)
+
+```{r}
+sigRes <- subset(res$table, FDR < 0.05 & abs(logFC) > 1)
+sigRes_HTG_2_Colnodysp <- sigRes
+knitr::kable(head(sigRes))
+# htseq_tags <- rownames(res$table)[1:20]; htseq_tags
+nrow(sigRes)
+# rownames(sigRes)[1:20]
+```
+
+
+## To add a column of up- and down-regulated genes
+
+```{r}
+deg_reg <- data.frame("regulation" = NULL)
+
+#to confirm the number of DEG is correct
+nrow(sigRes_HTG_2_Colnodysp); sum(nrow(subset(sigRes_HTG_2_Colnodysp,sigRes_HTG_2_Colnodysp$logFC > 1)),
+nrow(subset(sigRes_HTG_2_Colnodysp,sigRes_HTG_2_Colnodysp$logFC < 1)))
+
+
+for (i in sigRes_HTG_2_Colnodysp$logFC) {
+  # print(i)
+  if (i > 1) {
+    new_row <- data.frame(regulation = "up")
+    deg_reg <- rbind(deg_reg,new_row)
+  } else {new_row <- data.frame(regulation = "down")
+    deg_reg <- rbind(deg_reg,new_row)}
+  }
+
+sigRes_HTG_2_Colnodysp_reg <- cbind(sigRes_HTG_2_Colnodysp, deg_reg)
+nrow(sigRes_HTG_2_Colnodysp_reg)
+```
+
+## Visualize results in a Volcano plot
+
+```{r}
+library(ggplot2)
+library(ggrepel)
+
+volcanoPlot <- ggplot(res$table,
+                      aes(x = logFC, y = -log10(FDR),
+                          color = ifelse(FDR < 0.05 & abs(logFC) > 1, "darkred", "grey"))) +
+  geom_point() +
+  xlab(expression("Fold Change, Log"[2]*"")) +
+  ylab(expression("Adjusted P value, Log"[10]*"")) +
+  geom_vline(xintercept = c(-1, 1), linetype = "dotted", linewidth = 1) +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted", linewidth = 1) +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  scale_colour_manual(values = c("darkred", "grey", "steelblue")) +
+  geom_text_repel(aes(x = logFC, y = -log10(FDR), label = rownames(res$table)[1:10],
+                      size = 2, color = "steelblue"),
+                  data = res$table[1:10, ])
+print(volcanoPlot)
+```
+
+### 1. Perform hypothesis testing
+
+### Colitisonly vs coldysp
+
+```{r}
+(res <- glmQLFTest(fit, contrast = contrastMatrix2Coldysp))
+nrow(res)
+```
+
+### 2. filter genes, i.e., (i) create a table of top DEG (Tags) sorted by Pvalue
+
+```{r}
+(res <- topTags(res, n = nrow(countTable)))
+nrow(res)
+```
+
+### ... (ii) based on the level of significance (adjusted Pvalue, FDR adjusted Pvalue of 0.05) and the level of relevance (log2FC \> 1, i.e., FC of at least 2)
+
+```{r}
+sigRes <- subset(res$table, FDR < 0.05 & abs(logFC) > 1)
+sigRes_HTG_2_Coldysp <- sigRes
+knitr::kable(head(sigRes))
+# htseq_tags <- rownames(res$table)[1:20]; htseq_tags
+nrow(sigRes)
+# rownames(sigRes)[1:20]
+```
+
+## To add a column of up- and down-regulated genes
+
+```{r}
+deg_reg <- data.frame("regulation" = NULL)
+
+#to confirm the number of DEG is correct
+nrow(sigRes_HTG_2_Coldysp); sum(nrow(subset(sigRes_HTG_2_Coldysp,sigRes_HTG_2_Coldysp$logFC > 1)),
+nrow(subset(sigRes_HTG_2_Coldysp,sigRes_HTG_2_Coldysp$logFC < 1)))
+
+
+for (i in sigRes_HTG_2_Coldysp$logFC) {
+  # print(i)
+  if (i > 1) {
+    new_row <- data.frame(regulation = "up")
+    deg_reg <- rbind(deg_reg,new_row)
+  } else {new_row <- data.frame(regulation = "down")
+    deg_reg <- rbind(deg_reg,new_row)}
+  }
+
+sigRes_HTG_2_Coldysp_reg <- cbind(sigRes_HTG_2_Coldysp, deg_reg)
+nrow(sigRes_HTG_2_Coldysp)
+```
+
+## Visualize results in a Volcano plot
+
+```{r}
+library(ggplot2)
+library(ggrepel)
+
+volcanoPlot <- ggplot(res$table,
+                      aes(x = logFC, y = -log10(FDR),
+                          color = ifelse(FDR < 0.05 & abs(logFC) > 1, "darkred", "grey"))) +
+  geom_point() +
+  xlab(expression("Fold Change, Log"[2]*"")) +
+  ylab(expression("Adjusted P value, Log"[10]*"")) +
+  geom_vline(xintercept = c(-1, 1), linetype = "dotted", linewidth = 1) +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted", linewidth = 1) +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  scale_colour_manual(values = c("darkred", "grey", "steelblue")) +
+  geom_text_repel(aes(x = logFC, y = -log10(FDR), label = rownames(res$table)[1:10],
+                      size = 2, color = "steelblue"),
+                  data = res$table[1:10, ])
+print(volcanoPlot)
+```
+
+### 1. Perform hypothesis testing
+
+### colnodysp vs coldysp
+
+```{r}
+(res <- glmQLFTest(fit, contrast = contrastMatrix3Colnodysp))
+nrow(res)
+```
+
+### 2. filter genes, i.e., (i) create a table of top DEG (Tags) sorted by Pvalue
+
+```{r}
+(res <- topTags(res, n = nrow(countTable)))
+nrow(res)
+```
+
+### ... (ii) based on the level of significance (adjusted Pvalue, FDR adjusted Pvalue of 0.05) and the level of relevance (log2FC \> 1, i.e., FC of at least 2)
+
+```{r}
+sigRes <- subset(res$table, FDR < 0.05 & abs(logFC) > 1)
+sigRes_HTG_3_Colnodysp <- sigRes
+knitr::kable(head(sigRes))
+# htseq_tags <- rownames(res$table)[1:20]; htseq_tags
+nrow(sigRes)
+# rownames(sigRes)[1:20]
+```
+
+## To add a column of up- and down-regulated genes
+
+```{r}
+deg_reg <- data.frame("regulation" = NULL)
+
+#to confirm the number of DEG is correct
+nrow(sigRes_HTG_3_Colnodysp); sum(nrow(subset(sigRes_HTG_3_Colnodysp,sigRes_HTG_3_Colnodysp$logFC > 1)),
+nrow(subset(sigRes_HTG_3_Colnodysp,sigRes_HTG_3_Colnodysp$logFC < 1)))
+
+
+for (i in sigRes_HTG_3_Colnodysp$logFC) {
+  # print(i)
+  if (i > 1) {
+    new_row <- data.frame(regulation = "up")
+    deg_reg <- rbind(deg_reg,new_row)
+  } else {new_row <- data.frame(regulation = "down")
+    deg_reg <- rbind(deg_reg,new_row)}
+  }
+
+sigRes_HTG_3_Colnodysp_reg <- cbind(sigRes_HTG_3_Colnodysp, deg_reg)
+nrow(sigRes_HTG_3_Colnodysp)
+```
+
+
+## Visualize results in a Volcano plot
+
+```{r}
+library(ggplot2)
+library(ggrepel)
+
+volcanoPlot <- ggplot(res$table,
+                      aes(x = logFC, y = -log10(FDR),
+                          color = ifelse(FDR < 0.05 & abs(logFC) > 1, "darkred", "grey"))) +
+  geom_point() +
+  xlab(expression("Fold Change, Log"[2]*"")) +
+  ylab(expression("Adjusted P value, Log"[10]*"")) +
+  geom_vline(xintercept = c(-1, 1), linetype = "dotted", linewidth = 1) +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted", linewidth = 1) +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  scale_colour_manual(values = c("darkred", "grey", "steelblue")) +
+  geom_text_repel(aes(x = logFC, y = -log10(FDR), label = rownames(res$table)[1:10],
+                      size = 2, color = "steelblue"),
+                  data = res$table[1:10, ])
+print(volcanoPlot)
+```
+  
+
+```{r}
+# contrastMatrixAll <- makeContrasts(conditioncolitisOnly - conditionnoColitis, conditioncolitis_nodysplasia - conditionnoColitis, conditioncolitis_dysplasia - conditionnoColitis, levels = designMatrix)
+# 
+# head(contrastMatrixAll)
+```
+
+
+## Save the results as an R image
+
+```{r}
+save.image("C:/hne_files/MSc_Bioinf/MScProject-main_C/MScProject-main_10.06.23/scripts/DEG_analysis/Gene_counts/htg_pipeline/deseq2_statistical_analysis_HTG.Rdata")
+```
+
+
+=======================================================================================================
+# to compare the FDR and Pvalue as thresholds for significance; to help answer the question whether both threshold give consistent results
+
+
+## Step 4: Perform hypothesis testing
+### 1. Perform hypothesis testing
+```{r}
+res_Col <- glmQLFTest(fit, contrast = contrastMatrixCol)
+res_Colnodysp <- glmQLFTest(fit, contrast = contrastMatrixColnodysp)
+res_Coldysp <- glmQLFTest(fit, contrast = contrastMatrixColdysp)
+
+```
+
+### 2. filter genes, i.e., (i) create a table of top DEG (Tags) sorted by Pvalue
+
+
+```{r}
+res_Col <- glmQLFTest(fit, contrast = contrastMatrixCol)
+
+res <- res_Col
+
+res <- topTags(res, n = nrow(countTable))
+sigRes1 <- subset(res$table, FDR < 0.05 & abs(logFC) > 1)
+# knitr::kable(head(sigRes))
+
+sigRes2 <- subset(res$table, PValue < 0.05 & FDR < 0.05 & abs(logFC)> 1)
+# knitr::kable(head(sigRes))
+
+sigRes3 <- subset(res$table, PValue < 0.05 & abs(logFC)> 1)
+
+# knitr::kable(table(FDR = nrow(sigRes1), FDRnPvalue = nrow(sigRes2), Pvalue = nrow(sigRes3)))
+
+table1 <- table(FDR = nrow(sigRes1), FDRnPvalue = nrow(sigRes2), Pvalue = nrow(sigRes3))
+t1 <- paste("noCol vs ColOnly", knitr::kable(table1))
+print(t1)
+
+```
+
+
+```{r}
+res_Colnodysp <- glmQLFTest(fit, contrast = contrastMatrixColnodysp)
+
+res <- res_Colnodysp
+
+res <- topTags(res, n = nrow(countTable))
+sigRes1 <- subset(res$table, FDR < 0.05 & abs(logFC) > 1)
+# knitr::kable(head(sigRes))
+
+sigRes2 <- subset(res$table, PValue < 0.05 & FDR < 0.05 & abs(logFC)> 1)
+# knitr::kable(head(sigRes))
+
+sigRes3 <- subset(res$table, PValue < 0.05 & abs(logFC)> 1)
+
+# knitr::kable(table(FDR = nrow(sigRes1), FDRnPvalue = nrow(sigRes2), Pvalue = nrow(sigRes3)))
+
+table2 <- table(FDR = nrow(sigRes1), FDRnPvalue = nrow(sigRes2), Pvalue = nrow(sigRes3))
+t2 <- paste("noCol vs Colnodysp", knitr::kable(table2))
+print(t2)
+```
+
+### ... (ii) based on the level of significance (adjusted Pvalue, FDR adjusted Pvalue of 0.05) and the level of relevance (log2FC > 1, i.e., FC of at least 2)
+
+```{r}
+res_Coldysp <- glmQLFTest(fit, contrast = contrastMatrixColdysp)
+
+res <- res_Coldysp
+
+
+res <- topTags(res, n = nrow(countTable))
+sigRes1 <- subset(res$table, FDR < 0.05 & abs(logFC) > 1)
+# knitr::kable(head(sigRes))
+
+sigRes2 <- subset(res$table, PValue < 0.05 & FDR < 0.05 & abs(logFC)> 1)
+# knitr::kable(head(sigRes))
+
+sigRes3 <- subset(res$table, PValue < 0.05 & abs(logFC)> 1)
+
+# knitr::kable(table(FDR = nrow(sigRes1), FDRnPvalue = nrow(sigRes2), Pvalue = nrow(sigRes3)))
+
+table3 <- table(FDR = nrow(sigRes1), FDRnPvalue = nrow(sigRes2), Pvalue = nrow(sigRes3))
+t3 <- paste("noCol vs ColOnly", knitr::kable(table3))
+print(t3)
+```
+
+
+```{r}
+sigRes1 <- subset(res$table, FDR < 0.05 & abs(logFC) > 1)
+sigRes_HTG_Coldysp <- sigRes
+knitr::kable(head(sigRes))
+nrow(sigRes1)
+
+sigRes2 <- subset(res$table, PValue < 0.05 & FDR < 0.05 & abs(logFC)> 1)
+sigRes_HTG_Coldysp <- sigRes
+knitr::kable(head(sigRes))
+nrow(sigRes2)
+
+sigRes3 <- subset(res$table, PValue < 0.05 & abs(logFC)> 1)
+nrow(sigRes3)
+
+knitr::kable(table(FDR = nrow(sigRes1), FDRnPvalue = nrow(sigRes2), Pvalue = nrow(sigRes3)))
+
+
+
+paste("noCol vs ColOnly", knitr::kable(table(FDR = nrow(sigRes1), FDRnPvalue = nrow(sigRes2), Pvalue = nrow(sigRes3))))
+```
+
+
+
+
+```{r}
+
+for i in 
+sigRes1 <- subset(res$table, FDR < 0.05 & abs(logFC) > 1)
+sigRes_HTG_Coldysp <- sigRes
+knitr::kable(head(sigRes))
+nrow(sigRes1)
+
+sigRes2 <- subset(res$table, PValue < 0.05 & FDR < 0.05 & abs(logFC)> 1)
+sigRes_HTG_Coldysp <- sigRes
+knitr::kable(head(sigRes))
+nrow(sigRes2)
+
+sigRes3 <- subset(res$table, PValue < 0.05 & abs(logFC)> 1)
+nrow(sigRes3)
+
+knitr::kable(table(FDR = nrow(sigRes1), FDRnPvalue = nrow(sigRes2), Pvalue = nrow(sigRes3)))
+
+
+
+paste("noCol vs ColOnly", knitr::kable(table1)(FDR = nrow(sigRes1), FDRnPvalue = nrow(sigRes2), Pvalue = nrow(sigRes3))))
+```
+
+

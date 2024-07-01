@@ -1,0 +1,322 @@
+---
+title: "Read Quantification Statistics From HTSeq Output"
+author: "Hildah Njoroge"
+date: "2023-09-04"
+output:
+  word_document: default
+  html_document: default
+  pdf_document: default
+---
+
+### Specify the path to the tab-delimited file
+
+```{r , setwd("C:/hne_files/MSc_Bioinf/hisat2htseq_dataset/HTSeq/")}
+# Specify the path to the tab-delimited file
+
+file_path <- "C:/hne_files/MSc_Bioinf/hisat2htseq_dataset/HTSeq/"
+head(file_list <- list.files(file_path))
+
+```
+
+### move into that directory
+
+```{r}
+#setwd("C:/hne_files/MSc_Bioinf/hisat2htseq_dataset/HTSeq/"
+# move into that directory
+setwd(file_path)
+
+# read the files to select the row names from the last five lines - these lines contain the quantification statistics
+data <- read.csv("sample_1_counts.txt",sep = "\t", header = F)
+(data <- tail(data, n = 5L))
+
+(count_stats_df <- data.frame(V1=data$V1))
+row.names(count_stats_df) <- data$V1
+```
+
+### Create my results data.frame
+
+```{r , setwd("C:/hne_files/MSc_Bioinf/hisat2htseq_dataset/HTSeq/"}
+
+# move into that directory
+setwd(file_path)
+
+for ( i in file_list) {
+  # print(i)
+  data1 <- read.csv(i,sep = "\t", header = F)
+  data1
+  new_col <- tail(data1, n = 5L)
+  new_col <- data.frame(i=new_col$V3)
+  count_stats_df <- cbind(count_stats_df, new_col)
+
+}
+count_stats_df <- count_stats_df[,-1] # to exclude the first column
+```
+
+### Add the column names
+
+```{r}
+head(file_list)
+
+sample_ID <- data.frame()
+
+for (file1 in file_list) {
+  input_string <- file1
+
+# Extract characters using regular expression
+  selected_characters <- sub("^(.*?)_counts\\.txt$", "\\1", x =  input_string)
+
+  sample_ID <- rbind(sample_ID,selected_characters)
+}
+# sample_ID
+colnames(count_stats_df) <- sample_ID$X.sample_1.
+head(count_stats_df)
+
+```
+
+### Add a column of the total reads quantified
+
+```{r}
+# move into that directory
+setwd(file_path)
+# Create an empty data frame with one row and one column
+total_quant_df <- data.frame(Column1 = NA)
+
+# You can set the row name if needed
+rownames(total_quant_df) <- "__features"
+
+# Print the empty data frame
+print(total_quant_df)
+
+for ( i in file_list) {
+  # print(i)
+  data2 <- read.csv(i,sep = "\t", header = F)
+  data2
+  data2_exlcuded <- data2[1:(nrow(data2) - 5),] 
+  
+  new_col <- sum(data2_exlcuded$V3)
+  # new_col <- data.frame(i=new_col$V3)
+  total_quant_df <- cbind(total_quant_df, new_col)
+
+}
+total_quant_df <- total_quant_df[,-1] # to exclude the first column
+
+## add column names
+colnames(total_quant_df) <- sample_ID$X.sample_1.
+
+# this becomes the HTSeq library size of the quantified/summarised reads
+htseq_total_quant_df <- total_quant_df
+
+```
+
+### then add the feature counts to the final count statistics data.frame
+
+```{r}
+count_stats_df <-  rbind(count_stats_df,total_quant_df)
+```
+
+### Therefore, stats from HTSeq are as follows
+
+```{r}
+htseq_count_stats_df <- count_stats_df
+```
+
+### feature in the HTG raw gene count matrix - this needs to be compared to the total number of reads in the FASTQC files
+
+```{r}
+load("C:/hne_files/MSc_Bioinf/MScProject-main_C/MScProject-main_10.06.23/scripts/DEG_analysis/Gene_counts/filtering_criteria.Rdata")
+
+htg_count_stats_df <- data.frame(htg_seq_depth=colSums(counts(ddsHTG)))
+
+```
+
+### Library size of qunatified/summarised reads
+
+#### NB BE SURE TO MATCH THE ROW NAMES.
+
+```{r}
+load("C:/hne_files/MSc_Bioinf/MScProject-main_C/MScProject-main_10.06.23/scripts/DEG_analysis/Gene_counts/hisat2_htseq_pipeline/hisat2htseq_deseqdataset.Rdata")
+
+total_quant_df_reordered <- total_quant_df[,sampleFiles$x]
+
+# t_total_quant_df <- data.frame(t(total_quant_df_reordered))
+seq_depth_stat <- cbind(htg_count_stats_df,t(total_quant_df_reordered))
+colnames(seq_depth_stat) <- c("htg__lib_size_quant","htseq_lib_size_quant")
+```
+
+### calculating the library sizes
+
+#### 1. of sequenced reads
+
+##### this data will be obtained from the summary statistics obtained from the HISAT alignment step
+
+##### Specify the path to the tab-delimited summary files
+
+```{r, setwd("C:/hne_files/MSc_Bioinf/hisat2htseq_dataset/HISAT2/summary_files/"}
+# Specify the path to the tab-delimited file
+file_path <- "C:/hne_files/MSc_Bioinf/hisat2htseq_dataset/HISAT2/summary_files/"
+head(file_list <- list.files(file_path))
+
+```
+
+```{r , root.dir = "C:/hne_files/MSc_Bioinf/hisat2htseq_dataset/HISAT2/summary_files/", include=FALSE}
+# move into that directory
+setwd(file_path)
+
+# summary_n <- read.csv("summary_sample1.txt",sep = " ", header = F)
+# # summary_n
+# d <- head(summary_n, n = 1L)
+# # d
+
+sequencing_depth_df <-  data.frame(column1=NA)
+
+for ( i in file_list) {
+  # print(i)
+  summary_n <- read.csv(i,sep = " ", header = F)
+  summary_n
+  new_col <- head(summary_n, n = 1L)
+  new_col <- data.frame(i=new_col$V1)
+  sequencing_depth_df <- cbind(sequencing_depth_df, new_col)
+
+}
+sequencing_depth_df <- sequencing_depth_df[,-1] # to exclude the first column
+
+```
+
+##### Add column names
+
+```{r}
+head(file_list)
+
+summary_ID <- data.frame()
+
+for (file1 in file_list) {
+  input_string <- file1
+
+# Extract characters using regular expression
+  selected_characters <-  sub("summary_(.*?)\\.txt$", "\\1", x =  input_string)
+  selected_characters <- sub("(\\D+)(\\d+)", "\\1_\\2", selected_characters)
+  
+  summary_ID <- rbind(summary_ID,selected_characters)
+}
+# sample_ID
+colnames(sequencing_depth_df) <- summary_ID$X.sample_1.
+head(sequencing_depth_df)
+rownames(sequencing_depth_df) <- "__all_reads"
+
+# reorder the columns 
+sequencing_depth_df_reordered <- sequencing_depth_df[,sampleFiles$x]
+
+sequenced_reads_stat <- data.frame(t(sequencing_depth_df_reordered))
+colnames(sequenced_reads_stat) <- "sequencing_depth"
+
+```
+
+#### 2. of mapped reads
+
+```{r}
+columns_no <- ncol(htseq_count_stats_df)
+htseq_mapped_reads <- data.frame(column1=NA)
+
+for (colnumber in seq(1:columns_no)) {
+  # print(colnumber)
+
+  htseq_mapped_reads <- cbind(htseq_mapped_reads,(sum(c(count_stats_df["__features",colnumber], count_stats_df["__no_feature",colnumber], count_stats_df["__ambiguous",colnumber]))))
+}
+
+htseq_mapped_reads <- htseq_mapped_reads[,-1]
+colnames(htseq_mapped_reads) <- sample_ID$X.sample_1.
+
+
+htseq_mapped_reads_reordered <- htseq_mapped_reads[,sampleFiles$x]
+
+htg_mapped_reads <- htg_count_stats_df  # similar to quantified/summarised library size
+
+mapped_depth_stat <- cbind(htg_mapped_reads,t(htseq_mapped_reads_reordered))
+colnames(mapped_depth_stat) <- c("htg__lib_size_mapped","htseq_lib_size_mapped")
+
+```
+
+#### 3. of quantified/summarised reads
+
+```{r}
+seq_depth_stat # for both pipelines
+# (htseq_quant_reads <- htseq_total_quant_df)
+```
+
+### The final library size statistics 
+```{r}
+sequenced_reads_stat_comp <- cbind(sequenced_reads_stat, seq_depth_stat)
+
+sequenced_reads_stat_comp <- cbind(sequenced_reads_stat_comp,mapped_depth_stat)
+```
+
+### write this in a csv file
+```{r}
+write.csv(sequenced_reads_stat_comp, file = "C:/hne_files/MSc_Bioinf/MScProject-main_C/MScProject-main_10.06.23/results/pipeline_comparisons/different_library_sizes.csv")
+```
+
+
+======================================================================================
+## Summarising the library sizes and visualising 
+
+```{r}
+column_names <- colnames(sequenced_reads_stat_comp)
+sequenced_reads_stat_comp$sequencing_depth <- as.numeric(sequenced_reads_stat_comp$sequencing_depth)
+
+library_sizes <- data.frame(colSums(sequenced_reads_stat_comp))
+
+```
+
+```{r}
+library_sizes <- data.frame(HTG=c(library_sizes[1,1],library_sizes[4,1], library_sizes[2,1]), HTSeq=c(library_sizes[1,1],library_sizes[5,1], library_sizes[3,1]))
+library_sizes
+row.names(library_sizes) <- c("total_no_of_sequenced_reads","total_no_of_mapped_reads","total_no_of_reads_assigned_features")
+library_sizes
+
+write.csv(library_sizes,file = "C:/hne_files/MSc_Bioinf/MScProject-main_C/MScProject-main_10.06.23/results/pipeline_comparisons/library_sizes.csv")
+```
+
+#### To calculate the percentage of mapped and summarised read
+```{r}
+allseq_reads <- library_sizes[1,1]
+htg_mapped <- library_sizes[2,1]
+htseq_mapped <- library_sizes[2,2]
+htg_assigned_features <- library_sizes[3,1]
+htseq_assigned_features <- library_sizes[3,2]
+
+percentage_of_reads <- data.frame(HTG=c(round(htg_mapped/allseq_reads*100,1),round(htg_assigned_features/allseq_reads*100,1)), HTSeq=c(round(htseq_mapped/allseq_reads*100,1),round(htseq_assigned_features/allseq_reads*100,1)))
+percentage_of_reads
+rownames(percentage_of_reads) <- c("Mapped reads", "Summarised reads")
+percentage_of_reads
+
+write.csv(percentage_of_reads,file = "C:/hne_files/MSc_Bioinf/MScProject-main_C/MScProject-main_10.06.23/results/pipeline_comparisons/percentage_of_reads.csv")
+
+```
+
+### to compute the number of reads not aligned, alignemnt not unique, ambiguous and with no features found
+```{r}
+htseq_summary_stats <- data.frame(rowSums(htseq_count_stats_df))
+
+summary_perc <- data.frame(column1=NA)
+for (i in seq(nrow(htseq_summary_stats))) {
+  # print(i)
+  summary_perc <- rbind(summary_perc,round(htseq_summary_stats[i,1]/allseq_reads*100,1))
+}
+# summary_perc
+htseq_summary_stats <- cbind(htseq_summary_stats,summary_perc[-1,])
+colnames(htseq_summary_stats) <- c("No_of_reads","Percentage_of_reads (%)")
+
+
+write.csv(htseq_summary_stats,file = "C:/hne_files/MSc_Bioinf/MScProject-main_C/MScProject-main_10.06.23/results/pipeline_comparisons/htseq_summary_stats")
+
+total <- data.frame(colSums(htseq_summary_stats))
+total <- t(total)
+rownames(total) <- "__total_(all_sequenced_reads)"
+
+htseq_summary_stats <- rbind(htseq_summary_stats, total)
+write.csv(htseq_summary_stats,file = "C:/hne_files/MSc_Bioinf/MScProject-main_C/MScProject-main_10.06.23/results/pipeline_comparisons/htseq_summary_stats.csv")
+
+htseq_summary_stats
+
+```
+

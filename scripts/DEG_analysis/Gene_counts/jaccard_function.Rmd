@@ -1,0 +1,443 @@
+---
+title: "Jaccard funtion for the measure of similarity between two datasets"
+author: "Hildah Njoroge"
+date: "2023-08-16"
+output: html_document
+---
+
+##### Jaccard
+
+Jaccard Similarity = (number of observations in both sets, i.e., intersection) / (number in either set, i.e., union). This formula returns a value between 0 and 1. Values closer to 1 indicate there is a great degree of similarity between the two datasets
+
+Step 1, define the function
+
+```{r}
+jaccard <- function(a, b) {
+    intersection = length(intersect(a, b))
+    union = length(a) + length(b) - intersection
+    return (intersection/union)
+}
+```
+
+2.  Load the data 
+
+```{r}
+load("C:/hne_files/MSc_Bioinf/MScProject-main_C/MScProject-main_10.06.23/scripts/DEG_analysis/Gene_counts/htg_hisat2-htseq_pipeline_overlap.Rdata")
+```
+
+3. Run the function
+
+##### The Jaccard coeff of the noCol vs colOnly datasets
+```{r}
+length(genelist_colonly$htg) 
+length(genelist_colonly$htseq) 
+
+(jacc_coeff <- jaccard(genelist_colonly$htg, genelist_colonly$htseq))
+paste("The Jaccard coeff of the noCol vs colOnly datasets is", round(jacc_coeff,2))
+```
+##### The Jaccard coeff of the noCol vs colNodys datasets
+```{r}
+length(genelist_colnodys$htg)
+length(genelist_colnodys$htseq)
+
+(jacc_coeff <- jaccard(genelist_colnodys$htg, genelist_colnodys$htseq))
+paste("The Jaccard coeff of the noCol vs colNodys datasets is",round(jacc_coeff,2))
+```
+
+
+##### The Jaccard coeff of the noCol vs colDys datasets
+
+```{r}
+length(genelist_coldys$htg)
+length(genelist_coldys$htseq)
+
+(jacc_coeff <- jaccard(genelist_coldys$htg, genelist_coldys$htseq))
+
+paste("The Jaccard coeff of the noCol vs colDys datasets is", round(jacc_coeff,2))
+
+```
+
+##### Jaccard distance
+calculated as 1-jaccard(a,b)
+This function returns distance values between 0 and 1. The greater the value, in this case, the greater the distance btn the two datasets and, consequently, the less similar they are.
+
+
+================================================================================
+#### The Jaccard package
+
+##### Step 1: Install and load package
+```{r}
+if (!require(devtools)) {install.packages("devtools")}
+# library("devtools")
+if (!require("jaccard")) {devtools::install_github("ncchung/jaccard")}
+```
+
+##### Step 2: Prepare the data sets
+
+I. Load the necessary R image to acquire the genelists
+```{r}
+load("C:/hne_files/MSc_Bioinf/MScProject-main_C/MScProject-main_10.06.23/scripts/DEG_analysis/Gene_counts/htg_hisat2-htseq_pipeline_overlap.Rdata")
+```
+
+###### noCol vs colOnly groups
+II. Prepare the data.frame with the genes present and absent indicated by 1s and 0s, respectively
+
+```{r}
+# create an empty data frame
+jaccard_list_colonly <- data.frame()
+
+for (i in 1:length(genelist_colonly$htg)) {
+  # print(i)
+  new_row <- data.frame(htg = 1, htseq = 0)
+  jaccard_list_colonly <- rbind(jaccard_list_colonly, new_row)
+}
+head(jaccard_list_colonly)
+
+## to confirm that the number of rows is correct
+nrow(jaccard_list_colonly) ; length(genelist_colonly$htg)
+
+
+rownames(jaccard_list_colonly) <- genelist_colonly$htg
+
+jaccard_list_colonly2 <- data.frame()
+
+for (i in 1:length(genelist_colonly$htseq)) {
+  new_row2 <- data.frame(htg=0, htseq=1)
+  jaccard_list_colonly2 <- rbind(jaccard_list_colonly2,new_row2)
+}
+rownames(jaccard_list_colonly2) <- genelist_colonly$htseq
+
+jaccard_list_colonly <- rbind(jaccard_list_colonly,jaccard_list_colonly2)
+
+## to confirm that the number of rows created is correct
+nrow(jaccard_list_colonly) ; sum(length(genelist_colonly$htg), length(genelist_colonly$htseq))
+
+head(jaccard_list_colonly)
+```
+
+```{r}
+# from the Jaccard list, derive the non-unique
+non_unique_rows <- rownames(jaccard_list_colonly)[duplicated(c(genelist_colonly$htg,genelist_colonly$htseq))]
+
+```
+
+
+```{r}
+
+# create an empty data frame
+jaccard_list_colonly <- data.frame()
+
+for (i in 1:length(non_unique_rows)) {
+  # print(i)
+  new_row <- data.frame(htg = 1, htseq = 1)
+  jaccard_list_colonly <- rbind(jaccard_list_colonly, new_row)
+}
+head(jaccard_list_colonly)
+
+## to confirm that the number of rows is correct
+nrow(jaccard_list_colonly) ; length(non_unique_rows)
+
+
+rownames(jaccard_list_colonly) <- non_unique_rows
+head(jaccard_list_colonly)
+
+
+# unique in HTG pipeline
+jaccard_list_colonly2 <- data.frame()
+in_htg <- setdiff(genelist_colonly$htg,genelist_colonly$htseq)
+for (i in 1:length(in_htg)) {
+  new_row2 <- data.frame(htg=1, htseq=0)
+  jaccard_list_colonly2 <- rbind(jaccard_list_colonly2,new_row2)
+}
+rownames(jaccard_list_colonly2) <- in_htg
+
+jaccard_list_colonly <- rbind(jaccard_list_colonly,jaccard_list_colonly2)
+
+
+
+# unique in HTSeq pipeline
+jaccard_list_colonly3 <- data.frame()
+in_htseq <- setdiff(genelist_colonly$htseq,genelist_colonly$htg)
+for (i in 1:length(in_htseq)) {
+  new_row3 <- data.frame(htg=0, htseq=1)
+  jaccard_list_colonly3 <- rbind(jaccard_list_colonly3,new_row3)
+}
+rownames(jaccard_list_colonly3) <- in_htseq
+
+jaccard_list_colonly <- rbind(jaccard_list_colonly,jaccard_list_colonly3)
+
+## to confirm that the number of rows created is correct = 460
+nrow(jaccard_list_colonly) ; sum(length(in_htg),length(in_htseq),length(non_unique_rows))
+
+head(jaccard_list_colonly)
+```
+
+ 
+III. Run the Jaccard tool - first the Jaccard coeff
+```{r}
+#first create thethe binary vectors as input for jaccard
+binary1 <- jaccard_list_colonly$htg
+binary2 <- jaccard_list_colonly$htseq
+
+jaccard::jaccard(binary1,binary2)
+round(jaccard::jaccard(binary1,binary2),2)
+```
+IV. - the Pvalue to check the level of significance
+```{r}
+jaccard.test(binary1,binary2,method = "exact")
+```
+```{r}
+bootstrap_jaccard <- jaccard.test(binary1,binary2,method = "bootstrap")
+bootstrap_jaccard$pvalue
+
+```
+
+```{r}
+jaccard.test(binary1,binary2,method = "mca")
+
+```
+
+
+###### noCol vs colnoDys groups
+II. Prepare the data.frame with the genes present and absent indicated by 1s and 0s, respectively
+
+```{r}
+# create an empty data frame
+jaccard_list_colnodys <- data.frame()
+
+for (i in 1:length(genelist_colnodys$htg)) {
+  # print(i)
+  new_row <- data.frame(htg = 1, htseq = 0)
+  jaccard_list_colnodys <- rbind(jaccard_list_colnodys, new_row)
+}
+head(jaccard_list_colnodys)
+
+## to confirm that the number of rows is correct
+nrow(jaccard_list_colnodys) ; length(genelist_colnodys$htg)
+
+
+rownames(jaccard_list_colnodys) <- genelist_colnodys$htg
+
+jaccard_list_colnodys2 <- data.frame()
+
+for (i in 1:length(genelist_colnodys$htseq)) {
+  new_row2 <- data.frame(htg=0, htseq=1)
+  jaccard_list_colnodys2 <- rbind(jaccard_list_colnodys2,new_row2)
+}
+rownames(jaccard_list_colnodys2) <- genelist_colnodys$htseq
+
+jaccard_list_colnodys <- rbind(jaccard_list_colnodys,jaccard_list_colnodys2)
+
+## to confirm that the number of rows created is correct
+nrow(jaccard_list_colnodys) ; sum(length(genelist_colnodys$htg), length(genelist_colnodys$htseq))
+
+head(jaccard_list_colnodys)
+```
+
+```{r}
+# from the Jaccard list, derive the non-unique
+non_unique_rows <- rownames(jaccard_list_colnodys)[duplicated(c(genelist_colnodys$htg,genelist_colnodys$htseq))]
+
+```
+
+
+```{r}
+
+# create an empty data frame
+jaccard_list_colnodys <- data.frame()
+
+for (i in 1:length(non_unique_rows)) {
+  # print(i)
+  new_row <- data.frame(htg = 1, htseq = 1)
+  jaccard_list_colnodys <- rbind(jaccard_list_colnodys, new_row)
+}
+head(jaccard_list_colnodys)
+
+## to confirm that the number of rows is correct
+nrow(jaccard_list_colnodys) ; length(non_unique_rows)
+
+
+rownames(jaccard_list_colnodys) <- non_unique_rows
+head(jaccard_list_colnodys)
+
+
+# unique in HTG pipeline
+jaccard_list_colnodys2 <- data.frame()
+in_htg <- setdiff(genelist_colnodys$htg,genelist_colnodys$htseq)
+for (i in 1:length(in_htg)) {
+  new_row2 <- data.frame(htg=1, htseq=0)
+  jaccard_list_colnodys2 <- rbind(jaccard_list_colnodys2,new_row2)
+}
+rownames(jaccard_list_colnodys2) <- in_htg
+
+jaccard_list_colnodys <- rbind(jaccard_list_colnodys,jaccard_list_colnodys2)
+
+
+
+# unique in HTSeq pipeline
+jaccard_list_colnodys3 <- data.frame()
+in_htseq <- setdiff(genelist_colnodys$htseq,genelist_colnodys$htg)
+for (i in 1:length(in_htseq)) {
+  new_row3 <- data.frame(htg=0, htseq=1)
+  jaccard_list_colnodys3 <- rbind(jaccard_list_colnodys3,new_row3)
+}
+rownames(jaccard_list_colnodys3) <- in_htseq
+
+jaccard_list_colnodys <- rbind(jaccard_list_colnodys,jaccard_list_colnodys3)
+
+## to confirm that the number of rows created is correct = 481
+nrow(jaccard_list_colnodys) ; sum(length(in_htg),length(in_htseq),length(non_unique_rows))
+
+head(jaccard_list_colnodys)
+```
+
+ 
+III. Run the Jaccard tool - first the Jaccard coeff
+```{r}
+#first create thethe binary vectors as input for jaccard
+binary1 <- jaccard_list_colnodys$htg
+binary2 <- jaccard_list_colnodys$htseq
+
+jaccard::jaccard(binary1,binary2)
+```
+
+IV. - the Pvalue to check the level of significance
+```{r}
+jaccard.test(binary1,binary2,method = "exact")
+```
+
+
+```{r}
+bootstrap_jaccard <- jaccard.test(binary1,binary2,method = "bootstrap")
+bootstrap_jaccard$pvalue
+```
+
+```{r}
+jaccard.test(binary1,binary2,method = "mca")
+
+```
+
+
+
+###### noCol vs coldys groups
+II. Prepare the data.frame with the genes present and absent indicated by 1s and 0s, respectively
+
+```{r}
+# create an empty data frame
+jaccard_list_coldys <- data.frame()
+
+for (i in 1:length(genelist_coldys$htg)) {
+  # print(i)
+  new_row <- data.frame(htg = 1, htseq = 0)
+  jaccard_list_coldys <- rbind(jaccard_list_coldys, new_row)
+}
+head(jaccard_list_coldys)
+
+## to confirm that the number of rows is correct
+nrow(jaccard_list_coldys) ; length(genelist_coldys$htg)
+
+
+rownames(jaccard_list_coldys) <- genelist_coldys$htg
+
+jaccard_list_coldys2 <- data.frame()
+
+for (i in 1:length(genelist_coldys$htseq)) {
+  new_row2 <- data.frame(htg=0, htseq=1)
+  jaccard_list_coldys2 <- rbind(jaccard_list_coldys2,new_row2)
+}
+rownames(jaccard_list_coldys2) <- genelist_coldys$htseq
+
+jaccard_list_coldys <- rbind(jaccard_list_coldys,jaccard_list_coldys2)
+
+## to confirm that the number of rows created is correct
+nrow(jaccard_list_coldys) ; sum(length(genelist_coldys$htg), length(genelist_coldys$htseq))
+
+head(jaccard_list_coldys)
+```
+
+```{r}
+# from the Jaccard list, derive the non-unique
+non_unique_rows <- rownames(jaccard_list_coldys)[duplicated(c(genelist_coldys$htg,genelist_coldys$htseq))]
+
+```
+
+
+```{r}
+
+# create an empty data frame
+jaccard_list_coldys <- data.frame()
+
+for (i in 1:length(non_unique_rows)) {
+  # print(i)
+  new_row <- data.frame(htg = 1, htseq = 1)
+  jaccard_list_coldys <- rbind(jaccard_list_coldys, new_row)
+}
+head(jaccard_list_coldys)
+
+## to confirm that the number of rows is correct
+nrow(jaccard_list_coldys) ; length(non_unique_rows)
+
+
+rownames(jaccard_list_coldys) <- non_unique_rows
+head(jaccard_list_coldys)
+
+
+# unique in HTG pipeline
+jaccard_list_coldys2 <- data.frame()
+in_htg <- setdiff(genelist_coldys$htg,genelist_coldys$htseq)
+for (i in 1:length(in_htg)) {
+  new_row2 <- data.frame(htg=1, htseq=0)
+  jaccard_list_coldys2 <- rbind(jaccard_list_coldys2,new_row2)
+}
+rownames(jaccard_list_coldys2) <- in_htg
+
+jaccard_list_coldys <- rbind(jaccard_list_coldys,jaccard_list_coldys2)
+
+
+
+# unique in HTSeq pipeline
+jaccard_list_coldys3 <- data.frame()
+in_htseq <- setdiff(genelist_coldys$htseq,genelist_coldys$htg)
+for (i in 1:length(in_htseq)) {
+  new_row3 <- data.frame(htg=0, htseq=1)
+  jaccard_list_coldys3 <- rbind(jaccard_list_coldys3,new_row3)
+}
+rownames(jaccard_list_coldys3) <- in_htseq
+
+jaccard_list_coldys <- rbind(jaccard_list_coldys,jaccard_list_coldys3)
+
+## to confirm that the number of rows created is correct
+nrow(jaccard_list_coldys) ; sum(length(in_htg),length(in_htseq),length(non_unique_rows))
+
+head(jaccard_list_coldys)
+```
+
+ 
+III. Run the Jaccard tool - first the Jaccard coeff
+```{r}
+#first create thethe binary vectors as input for jaccard
+binary1 <- jaccard_list_coldys$htg
+binary2 <- jaccard_list_coldys$htseq
+
+jaccard::jaccard(binary1,binary2)
+```
+
+IV. - the Pvalue to check the level of significance
+```{r}
+# jaccard.test(binary1,binary2,method = "exact")
+```
+```{r}
+bootstrap_jaccard <- jaccard.test(binary1,binary2,method = "bootstrap")
+bootstrap_jaccard$pvalue
+```
+
+```{r}
+# jaccard.test(binary1,binary2,method = "mca")
+
+```
+
+#### Save the R image
+```{r}
+save.image("C:/hne_files/MSc_Bioinf/MScProject-main_C/MScProject-main_10.06.23/scripts/DEG_analysis/Gene_counts/jaccard_function.RData")
+```
+

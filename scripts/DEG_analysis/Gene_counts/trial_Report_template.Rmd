@@ -1,0 +1,90 @@
+---
+title: "Report template"
+author: "Authors"
+date: "Date prepared"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    theme: united
+    highlight: pygments
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Heading 1
+
+## Heading 2
+
+Some text
+
+```{r message = FALSE}
+#Here you can put R code
+
+```
+
+```{r, message = FALSE, Fig 1, fig.align='center', fig.cap='Figure 1: Caption', out.width=768, fig.pos='H'}
+
+# htseq_meanLog2CPM <- rowMeans(log2(cpm(htseq_countTable) + 1)) ## what is recommended in the script
+# 
+# #meanLog2CPM <- rowMeans(log2(cpm(htg_countTable) + 1))
+# hist(htseq_meanLog2CPM, xlim = c(-5,20)) ; hist(htg_meanLog2CPM, xlim = c(-5,20) )
+# sum(htseq_meanLog2CPM <= 1)
+# #This block contains some useful options for inserting figures
+print(pcaPlot)
+
+```
+
+
+
+
+
+
+
+
+```{r, message = FALSE, Fig 1, fig.align='center', fig.cap='Figure 1: Caption', out.width=768, fig.pos='H'}
+
+# htseq_meanLog2CPM <- rowMeans(log2(cpm(htseq_countTable) + 1)) ## what is recommended in the script
+# 
+# #meanLog2CPM <- rowMeans(log2(cpm(htg_countTable) + 1))
+# hist(htseq_meanLog2CPM, xlim = c(-5,20)) ; hist(htg_meanLog2CPM, xlim = c(-5,20) )
+# sum(htseq_meanLog2CPM <= 1)
+# #This block contains some useful options for inserting figures
+print(pcaPlot)
+
+```
+
+
+
+
+
+
+```{r, message = FALSE, Fig 1, fig.align='center', fig.cap='Figure 1: Caption', out.width=768, fig.pos='H'}
+
+# htseq_meanLog2CPM <- rowMeans(log2(cpm(htseq_countTable) + 1)) ## what is recommended in the script
+# 
+# #meanLog2CPM <- rowMeans(log2(cpm(htg_countTable) + 1))
+# hist(htseq_meanLog2CPM, xlim = c(-5,20)) ; hist(htg_meanLog2CPM, xlim = c(-5,20) )
+# sum(htseq_meanLog2CPM <= 1)
+# #This block contains some useful options for inserting figures
+print(pcaPlot)
+
+```
+
+
+
+
+
+```{r, message = FALSE, Fig 1, fig.align='center', fig.cap='Figure 1: Caption', out.width=768, fig.pos='H'}
+
+# htseq_meanLog2CPM <- rowMeans(log2(cpm(htseq_countTable) + 1)) ## what is recommended in the script
+# 
+# #meanLog2CPM <- rowMeans(log2(cpm(htg_countTable) + 1))
+# hist(htseq_meanLog2CPM, xlim = c(-5,20)) ; hist(htg_meanLog2CPM, xlim = c(-5,20) )
+# sum(htseq_meanLog2CPM <= 1)
+# #This block contains some useful options for inserting figures
+print(pcaPlot)
+
+```

@@ -1,0 +1,199 @@
+htseq                    /home/user/miniconda3/envs/htseq
+Performing read quantification using HTSeq
+Error occured when processing GFF file (line 12 of file /media/user/HildaWN/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gff):
+  Feature exon-XR_004936710.1-1 does not contain a 'gene_id' attribute
+  [Exception type: ValueError, raised in count.py:88]
+Error occured when processing GFF file (line 12 of file /media/user/HildaWN/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gff):
+  Feature exon-XR_004936710.1-1 does not contain a 'gene_id' attribute
+  [Exception type: ValueError, raised in count.py:88]
+Error occured when processing GFF file (line 12 of file /media/user/HildaWN/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gff):
+  Feature exon-XR_004936710.1-1 does not contain a 'gene_id' attribute
+  [Exception type: ValueError, raised in count.py:88]
+Error occured when processing GFF file (line 12 of file /media/user/HildaWN/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gff):
+  Feature exon-XR_004936710.1-1 does not contain a 'gene_id' attribute
+  [Exception type: ValueError, raised in count.py:88]
+Error occured when processing GFF file (line 12 of file /media/user/HildaWN/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gff):
+  Feature exon-XR_004936710.1-1 does not contain a 'gene_id' attribute
+  [Exception type: ValueError, raised in count.py:88]
+Error occured when processing GFF file (line 12 of file /media/user/HildaWN/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gff):
+  Feature exon-XR_004936710.1-1 does not contain a 'gene_id' attribute
+  [Exception type: ValueError, raised in count.py:88]
+Error occured when processing GFF file (line 12 of file /media/user/HildaWN/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gff):
+  Feature exon-XR_004936710.1-1 does not contain a 'gene_id' attribute
+  [Exception type: ValueError, raised in count.py:88]
+Error occured when processing GFF file (line 12 of file /media/user/HildaWN/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gff):
+  Feature exon-XR_004936710.1-1 does not contain a 'gene_id' attribute
+  [Exception type: ValueError, raised in count.py:88]
+Error occured when processing GFF file (line 12 of file /media/user/HildaWN/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gff):
+  Feature exon-XR_004936710.1-1 does not contain a 'gene_id' attribute
+  [Exception type: ValueError, raised in count.py:88]
+Error occured when processing GFF file (line 12 of file /media/user/HildaWN/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gff):
+  Feature exon-XR_004936710.1-1 does not contain a 'gene_id' attribute
+  [Exception type: ValueError, raised in count.py:88]
+Error occured when processing GFF file (line 12 of file /media/user/HildaWN/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gff):
+  Feature exon-XR_004936710.1-1 does not contain a 'gene_id' attribute
+  [Exception type: ValueError, raised in count.py:88]
+Error occured when processing GFF file (line 12 of file /media/user/HildaWN/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gff):
+  Feature exon-XR_004936710.1-1 does not contain a 'gene_id' attribute
+  [Exception type: ValueError, raised in count.py:88]
+Error occured when processing GFF file (line 12 of file /media/user/HildaWN/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gff):
+  Feature exon-XR_004936710.1-1 does not contain a 'gene_id' attribute
+  [Exception type: ValueError, raised in count.py:88]
+Error occured when processing GFF file (line 12 of file /media/user/HildaWN/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gff):
+  Feature exon-XR_004936710.1-1 does not contain a 'gene_id' attribute
+  [Exception type: ValueError, raised in count.py:88]
+Error occured when processing GFF file (line 12 of file /media/user/HildaWN/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gff):
+  Feature exon-XR_004936710.1-1 does not contain a 'gene_id' attribute
+  [Exception type: ValueError, raised in count.py:88]
+Error occured when processing GFF file (line 12 of file /media/user/HildaWN/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gff):
+  Feature exon-XR_004936710.1-1 does not contain a 'gene_id' attribute
+  [Exception type: ValueError, raised in count.py:88]
+Error occured when processing GFF file (line 12 of file /media/user/HildaWN/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gff):
+  Feature exon-XR_004936710.1-1 does not contain a 'gene_id' attribute
+  [Exception type: ValueError, raised in count.py:88]
+Error occured when processing GFF file (line 12 of file /media/user/HildaWN/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gff):
+  Feature exon-XR_004936710.1-1 does not contain a 'gene_id' attribute
+  [Exception type: ValueError, raised in count.py:88]
+Error occured when processing GFF file (line 12 of file /media/user/HildaWN/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gff):
+  Feature exon-XR_004936710.1-1 does not contain a 'gene_id' attribute
+  [Exception type: ValueError, raised in count.py:88]
+Error occured when processing GFF file (line 12 of file /media/user/HildaWN/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gff):
+  Feature exon-XR_004936710.1-1 does not contain a 'gene_id' attribute
+  [Exception type: ValueError, raised in count.py:88]
+Error occured when processing GFF file (line 12 of file /media/user/HildaWN/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gff):
+  Feature exon-XR_004936710.1-1 does not contain a 'gene_id' attribute
+  [Exception type: ValueError, raised in count.py:88]
+Error occured when processing GFF file (line 12 of file /media/user/HildaWN/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gff):
+  Feature exon-XR_004936710.1-1 does not contain a 'gene_id' attribute
+  [Exception type: ValueError, raised in count.py:88]
+Error occured when processing GFF file (line 12 of file /media/user/HildaWN/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gff):
+  Feature exon-XR_004936710.1-1 does not contain a 'gene_id' attribute
+  [Exception type: ValueError, raised in count.py:88]
+Error occured when processing GFF file (line 12 of file /media/user/HildaWN/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gff):
+  Feature exon-XR_004936710.1-1 does not contain a 'gene_id' attribute
+  [Exception type: ValueError, raised in count.py:88]
+Error occured when processing GFF file (line 12 of file /media/user/HildaWN/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gff):
+  Feature exon-XR_004936710.1-1 does not contain a 'gene_id' attribute
+  [Exception type: ValueError, raised in count.py:88]
+Error occured when processing GFF file (line 12 of file /media/user/HildaWN/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gff):
+  Feature exon-XR_004936710.1-1 does not contain a 'gene_id' attribute
+  [Exception type: ValueError, raised in count.py:88]
+Error occured when processing GFF file (line 12 of file /media/user/HildaWN/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gff):
+  Feature exon-XR_004936710.1-1 does not contain a 'gene_id' attribute
+  [Exception type: ValueError, raised in count.py:88]
+Error occured when processing GFF file (line 12 of file /media/user/HildaWN/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gff):
+  Feature exon-XR_004936710.1-1 does not contain a 'gene_id' attribute
+  [Exception type: ValueError, raised in count.py:88]
+Error occured when processing GFF file (line 12 of file /media/user/HildaWN/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gff):
+  Feature exon-XR_004936710.1-1 does not contain a 'gene_id' attribute
+  [Exception type: ValueError, raised in count.py:88]
+Error occured when processing GFF file (line 12 of file /media/user/HildaWN/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gff):
+  Feature exon-XR_004936710.1-1 does not contain a 'gene_id' attribute
+  [Exception type: ValueError, raised in count.py:88]
+Error occured when processing GFF file (line 12 of file /media/user/HildaWN/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gff):
+  Feature exon-XR_004936710.1-1 does not contain a 'gene_id' attribute
+  [Exception type: ValueError, raised in count.py:88]
+Error occured when processing GFF file (line 12 of file /media/user/HildaWN/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gff):
+  Feature exon-XR_004936710.1-1 does not contain a 'gene_id' attribute
+  [Exception type: ValueError, raised in count.py:88]
+Error occured when processing GFF file (line 12 of file /media/user/HildaWN/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gff):
+  Feature exon-XR_004936710.1-1 does not contain a 'gene_id' attribute
+  [Exception type: ValueError, raised in count.py:88]
+Error occured when processing GFF file (line 12 of file /media/user/HildaWN/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gff):
+  Feature exon-XR_004936710.1-1 does not contain a 'gene_id' attribute
+  [Exception type: ValueError, raised in count.py:88]
+Error occured when processing GFF file (line 12 of file /media/user/HildaWN/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gff):
+  Feature exon-XR_004936710.1-1 does not contain a 'gene_id' attribute
+  [Exception type: ValueError, raised in count.py:88]
+Error occured when processing GFF file (line 12 of file /media/user/HildaWN/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gff):
+  Feature exon-XR_004936710.1-1 does not contain a 'gene_id' attribute
+  [Exception type: ValueError, raised in count.py:88]
+Error occured when processing GFF file (line 12 of file /media/user/HildaWN/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gff):
+  Feature exon-XR_004936710.1-1 does not contain a 'gene_id' attribute
+  [Exception type: ValueError, raised in count.py:88]
+Error occured when processing GFF file (line 12 of file /media/user/HildaWN/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gff):
+  Feature exon-XR_004936710.1-1 does not contain a 'gene_id' attribute
+  [Exception type: ValueError, raised in count.py:88]
+Error occured when processing GFF file (line 12 of file /media/user/HildaWN/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gff):
+  Feature exon-XR_004936710.1-1 does not contain a 'gene_id' attribute
+  [Exception type: ValueError, raised in count.py:88]
+Error occured when processing GFF file (line 12 of file /media/user/HildaWN/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gff):
+  Feature exon-XR_004936710.1-1 does not contain a 'gene_id' attribute
+  [Exception type: ValueError, raised in count.py:88]
+Error occured when processing GFF file (line 12 of file /media/user/HildaWN/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gff):
+  Feature exon-XR_004936710.1-1 does not contain a 'gene_id' attribute
+  [Exception type: ValueError, raised in count.py:88]
+Error occured when processing GFF file (line 12 of file /media/user/HildaWN/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gff):
+  Feature exon-XR_004936710.1-1 does not contain a 'gene_id' attribute
+  [Exception type: ValueError, raised in count.py:88]
+Error occured when processing GFF file (line 12 of file /media/user/HildaWN/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gff):
+  Feature exon-XR_004936710.1-1 does not contain a 'gene_id' attribute
+  [Exception type: ValueError, raised in count.py:88]
+Error occured when processing GFF file (line 12 of file /media/user/HildaWN/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gff):
+  Feature exon-XR_004936710.1-1 does not contain a 'gene_id' attribute
+  [Exception type: ValueError, raised in count.py:88]
+Error occured when processing GFF file (line 12 of file /media/user/HildaWN/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gff):
+  Feature exon-XR_004936710.1-1 does not contain a 'gene_id' attribute
+  [Exception type: ValueError, raised in count.py:88]
+Error occured when processing GFF file (line 12 of file /media/user/HildaWN/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gff):
+  Feature exon-XR_004936710.1-1 does not contain a 'gene_id' attribute
+  [Exception type: ValueError, raised in count.py:88]
+Error occured when processing GFF file (line 12 of file /media/user/HildaWN/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gff):
+  Feature exon-XR_004936710.1-1 does not contain a 'gene_id' attribute
+  [Exception type: ValueError, raised in count.py:88]
+Error occured when processing GFF file (line 12 of file /media/user/HildaWN/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gff):
+  Feature exon-XR_004936710.1-1 does not contain a 'gene_id' attribute
+  [Exception type: ValueError, raised in count.py:88]
+Error occured when processing GFF file (line 12 of file /media/user/HildaWN/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gff):
+  Feature exon-XR_004936710.1-1 does not contain a 'gene_id' attribute
+  [Exception type: ValueError, raised in count.py:88]
+Error occured when processing GFF file (line 12 of file /media/user/HildaWN/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gff):
+  Feature exon-XR_004936710.1-1 does not contain a 'gene_id' attribute
+  [Exception type: ValueError, raised in count.py:88]
+Error occured when processing GFF file (line 12 of file /media/user/HildaWN/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gff):
+  Feature exon-XR_004936710.1-1 does not contain a 'gene_id' attribute
+  [Exception type: ValueError, raised in count.py:88]
+Error occured when processing GFF file (line 12 of file /media/user/HildaWN/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gff):
+  Feature exon-XR_004936710.1-1 does not contain a 'gene_id' attribute
+  [Exception type: ValueError, raised in count.py:88]
+Error occured when processing GFF file (line 12 of file /media/user/HildaWN/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gff):
+  Feature exon-XR_004936710.1-1 does not contain a 'gene_id' attribute
+  [Exception type: ValueError, raised in count.py:88]
+Error occured when processing GFF file (line 12 of file /media/user/HildaWN/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gff):
+  Feature exon-XR_004936710.1-1 does not contain a 'gene_id' attribute
+  [Exception type: ValueError, raised in count.py:88]
+Error occured when processing GFF file (line 12 of file /media/user/HildaWN/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gff):
+  Feature exon-XR_004936710.1-1 does not contain a 'gene_id' attribute
+  [Exception type: ValueError, raised in count.py:88]
+Error occured when processing GFF file (line 12 of file /media/user/HildaWN/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gff):
+  Feature exon-XR_004936710.1-1 does not contain a 'gene_id' attribute
+  [Exception type: ValueError, raised in count.py:88]
+Error occured when processing GFF file (line 12 of file /media/user/HildaWN/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gff):
+  Feature exon-XR_004936710.1-1 does not contain a 'gene_id' attribute
+  [Exception type: ValueError, raised in count.py:88]
+Error occured when processing GFF file (line 12 of file /media/user/HildaWN/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gff):
+  Feature exon-XR_004936710.1-1 does not contain a 'gene_id' attribute
+  [Exception type: ValueError, raised in count.py:88]
+Error occured when processing GFF file (line 12 of file /media/user/HildaWN/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gff):
+  Feature exon-XR_004936710.1-1 does not contain a 'gene_id' attribute
+  [Exception type: ValueError, raised in count.py:88]
+Error occured when processing GFF file (line 12 of file /media/user/HildaWN/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gff):
+  Feature exon-XR_004936710.1-1 does not contain a 'gene_id' attribute
+  [Exception type: ValueError, raised in count.py:88]
+Error occured when processing GFF file (line 12 of file /media/user/HildaWN/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gff):
+  Feature exon-XR_004936710.1-1 does not contain a 'gene_id' attribute
+  [Exception type: ValueError, raised in count.py:88]
+Error occured when processing GFF file (line 12 of file /media/user/HildaWN/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gff):
+  Feature exon-XR_004936710.1-1 does not contain a 'gene_id' attribute
+  [Exception type: ValueError, raised in count.py:88]
+Error occured when processing GFF file (line 12 of file /media/user/HildaWN/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gff):
+  Feature exon-XR_004936710.1-1 does not contain a 'gene_id' attribute
+  [Exception type: ValueError, raised in count.py:88]
+Error occured when processing GFF file (line 12 of file /media/user/HildaWN/ref_genome_grcm39/ncbi_dataset/data/GCF_000001635.27/genomic.gff):
+  Feature exon-XR_004936710.1-1 does not contain a 'gene_id' attribute
+  [Exception type: ValueError, raised in count.py:88]
+Finished quantifying reads
+20 seconds
+0 minutes and 20 seconds elapsed
+ 
+##############################################################################################################

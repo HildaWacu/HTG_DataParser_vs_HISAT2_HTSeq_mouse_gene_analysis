@@ -1,0 +1,60 @@
+---
+title: "Calculating the average alignment rate - HISAT2_HTSeq pipeline"
+author: "Hildah Njoroge"
+date: "2023-10-31"
+output: html_document
+---
+
+---
+title: "Read Quantification Statistics From HTSeq Output"
+author: "Hildah Njoroge"
+date: "2023-09-04"
+output:
+  word_document: default
+  html_document: default
+  pdf_document: default
+---
+
+### calculating the alignment rate of sequenced reads
+
+##### this data will be obtained from the summary statistics obtained from the HISAT alignment step
+
+##### Specify the path to the tab-delimited summary files
+
+```{r, setwd("C:/hne_files/MSc_Bioinf/hisat2htseq_dataset/HISAT2/summary_files/"}
+# Specify the path to the tab-delimited file
+file_path <- "C:/hne_files/MSc_Bioinf/hisat2htseq_dataset/HISAT2/summary_files/"
+head(file_list <- list.files(file_path))
+
+```
+
+```{r , root.dir = "C:/hne_files/MSc_Bioinf/hisat2htseq_dataset/HISAT2/summary_files/", include=FALSE}
+# move into that directory
+setwd(file_path)
+
+# summary_n <- read.csv("summary_sample1.txt",sep = " ", header = F)
+# # summary_n
+# d <- head(summary_n, n = 1L)
+# # d
+
+alignment_rate <-  data.frame(column1=NA)
+
+for ( i in file_list) {
+  print(i)
+  summary_n <- read.csv(i,sep = " ", header = F)
+  summary_n
+  new_col <- tail(summary_n, n = 1L)
+  new_col <- new_col$V1
+  new_col <- gsub("\\%", "", new_col)
+  new_col <- data.frame(i= as.numeric(new_col))
+  alignment_rate <- cbind(alignment_rate, new_col)
+
+}
+alignment_rate <- t(alignment_rate[,-1]) # to exclude the first column
+paste("mean alignment rate in %: ", round(mean(alignment_rate),1))
+      
+
+colnames(alignment_rate) <- "alignment_rate"
+write.csv(alignment_rate,file = "C:/hne_files/MSc_Bioinf/MScProject-main_C/MScProject-main_10.06.23/results/pipeline_comparisons/alignment_rates.csv")
+
+```
